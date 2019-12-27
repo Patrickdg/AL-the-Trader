@@ -7,8 +7,6 @@
 ## yFinance
 ### https://pypi.org/project/yfinance/
 
-
-
 #==============================
 # Libraries
 import finviz
@@ -19,8 +17,8 @@ import pandas as pd
 import yfinance as yf
 
 #==============================
-
-# Individual Stocks
+# finviz
+## Individual Stocks
 aapl = finviz.get_stock('AAPL')
 aapl.keys()
 
@@ -29,5 +27,17 @@ aapl.keys()
 hist = yf.Ticker('MSFT')
 hist.history(period = "max")
 hist.calendar
+
+#==============================
+
+# yfinance
+
+msft = yf.Ticker("MSFT")
+
+msft.quarterly_cashflow
+msft.quarterly_balance_sheet
+msft.earnings
+msft.sustainability
+
 
 
