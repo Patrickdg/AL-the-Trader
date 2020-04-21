@@ -5,7 +5,8 @@ import yfinance as yf
 
 # PARAMETERS ==============================
 PORTFOLIO_FILE = pd.ExcelFile('portfolio.xlsx')
-PORTFOLIO = pd.read_excel(PORTFOLIO_FILE, sheet_name= 'portfolio', header = 0)
+STOCKS = pd.read_excel(PORTFOLIO_FILE, sheet_name= 'stocks', header = 0, index_col = 0)
+PORTFOLIO = pd.read_excel(PORTFOLIO_FILE, sheet_name = 'portfolio', header = 0, index_col = 0)
 WATCHLIST = pd.read_excel(PORTFOLIO_FILE, sheet_name= 'watchlist', header = 0)
 
 # TESTING ==============================

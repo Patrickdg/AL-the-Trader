@@ -1,41 +1,111 @@
 # LIBRARIES ==============================
 import yfinance as yf
 import pandas as pd
+import numpy as np
 
 # OBJECTS, FUNCTIONS ==============================
 class Asset():
-    def __init__(self, ticker):
+    def __init__(self, ticker, period = '2mo'):
+        data = yf.Ticker(ticker)
+        
         self.ticker = ticker
-        self.price = 0
-        self.shares = 0
-        self.history = 0
-        self.dict = {}
+        self.history = data.history(period = period).Close
+        self.price = data.history(period = period).Close[-1] # extract latest price
+        self.shares = 0 # shares held in portfolio
         self.rsi = 0
-
-    def get_ticker_data(self, period = '2mo'):
-        data = yf.Ticker(self.ticker)
-        history = data.history(period = period).Close[-1]
-        self.history = history
-        self.price = history[-1]
 
     def get_portfolio_data(self, df):
         self.shares = df.loc[df.ticker == self.ticker].shares
 
-    def buy(self, portfolio_df):
-        self.compile_dict()
+    def buy_sell(self, buy_sell, num_shares, stocks_df, portfolio_df):
+        if buy_sell == 'sell': 
+            num_shares *= -1
+        cash_change = num_shares * self.price
+        
+        self.update_portfolio(cash_change, portfolio_df)
+        self.update_stocks(stocks_df)
+        self.shares += num_shares
 
-    def sell(self):
-        pass
+
+
+    def update_portfolio(self, cash_change, portfolio_df):
+        portfolio_df.xs('CASH')['value'] -= cash_change
+        portfolio_df.xs('STOCKS')['value'] += cash_change
+
+    def update_stocks(self, stocks_df):
+        asset = compile_asset()
+        stocks_df.loc[self.ticker] = asset
+
+    def compile_asset(self):
+        asset = [self.ticker,
+                self.price,
+                self.shares,
+                self.price * self.shares,
+                self.rsi
+                ]
+        return asset
 
     def rsi(self):
         pass
 
-    def compile_dict(self):
-        self.dict = {'ticker': self.ticker,
-                    'current_price': self.price,
-                    'shares': self.shares,
-                    'value': self.price * self.shares,
-                    'current_rsi': self.rsi}
+# REFERENCE LINK FOR AVERAGES (https://www.macroption.com/rsi-calculation/)
+def calc_sma(historicals, periods):
+    period = historicals[-periods:]
+    return np.mean(period)
 
-def calc_rsi():
+def calc_ema(historicals, period):
     pass
+    # alpha = 2 / (period + 1)
+
+def calc_wma(historicals, period):
+    pass
+
+def calc_rs(historicals, lookback_period, avg_method):
+    u_changes = []
+    d_changes = []
+
+    historicals = historicals[-lookback_period:]
+    print(historicals)
+    print(historicals[2])
+    print(historicals[2] - historicals[2 - 1])
+    for n in range(1, len(historicals)):
+        chg = historicals[n] - historicals[n-1]
+        if chg > 0: 
+            u_changes.append(chg)
+        elif chg < 0: 
+            d_changes.append(abs(chg))
+    
+    u_len = len(u_changes)
+    d_len = len(d_changes)
+
+    u_avg = ''
+    d_avg = ''
+    if avg_method == 'sma':
+        u_avg = calc_sma(u_changes, u_len-1)
+        d_avg = calc_sma(d_changes, d_len-1)
+    elif avg_method == 'ema':
+        u_avg = calc_ema(u_changes)
+        d_avg = calc_ema(d_changes)
+    elif avg_method == 'wma':
+        u_avg = calc_wma(u_changes)
+        d_avg = calc_wma(d_changes)
+
+    rs = u_avg / d_avg
+    return rs
+
+def calc_rsi(data, lookback_period, avg_method):
+    relative_strength = calc_rs(data, lookback_period, avg_method)
+
+    avg_gain = 0
+    avg_loss = 0
+    rsi = 100 - [100 / (1 + relative_strength)]
+    return rsi
+
+# TESTING ==================
+msft = yf.Ticker("MSFT")
+
+x = msft.history(period = '3wk')
+calc_rsi(x.Close, 14, 'sma')
+calc_sma(x.Close, 2)
+
+
