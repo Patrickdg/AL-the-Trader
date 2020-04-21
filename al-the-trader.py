@@ -1,43 +1,21 @@
 #==============================
-# Resources
-
-## Finviz
-### https://github.com/mariostoev/finviz
-
-## yFinance
-### https://pypi.org/project/yfinance/
-
-#==============================
 # Libraries
-import finviz
-from finviz.screener import Screener
-from finviz.portfolio import Portfolio
 import pandas as pd
-
 import yfinance as yf
 
-#==============================
-# finviz
-## Individual Stocks
-aapl = finviz.get_stock('AAPL')
-aapl.keys()
+# PARAMETERS ==============================
+PORTFOLIO_FILE = pd.ExcelFile('portfolio.xlsx')
+PORTFOLIO = pd.read_excel(PORTFOLIO_FILE, sheet_name= 'portfolio', header = 0)
+WATCHLIST = pd.read_excel(PORTFOLIO_FILE, sheet_name= 'watchlist', header = 0)
 
-
-
-hist = yf.Ticker('MSFT')
-hist.history(period = "max")
-hist.calendar
-
-#==============================
-
-# yfinance
-
+# TESTING ==============================
 msft = yf.Ticker("MSFT")
 
+msft.info
 msft.quarterly_cashflow
 msft.quarterly_balance_sheet
 msft.earnings
 msft.sustainability
-
-
+msft.history(period = '2wk')
+msft.actions
 
