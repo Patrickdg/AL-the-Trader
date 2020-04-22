@@ -14,11 +14,8 @@ class Asset():
         self.shares = 0 # shares held in portfolio
         self.rsi = 0
 
-    def get_current_holdings(self, df):
-        try:
-            self.shares = df.loc[df.loc['ticker'] == self.ticker].shares
-        except:
-            print("No shares in portfolio")
+    # def get_current_holdings(self, df):
+        # pass
 
     def buy_sell(self, buy_sell, num_shares, stocks_df, portfolio_df):
         if buy_sell == 'sell': 

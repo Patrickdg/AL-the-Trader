@@ -1,7 +1,7 @@
 # ============================== LIBRARIES 
 import pandas as pd
 import yfinance as yf
-import asset_funcs as af
+import assetfuncs as af
 
 # ============================== PARAMETERS
 PORTFOLIO_FILE = pd.ExcelFile('portfolio.xlsx')
@@ -10,13 +10,14 @@ STOCKS = pd.read_excel(PORTFOLIO_FILE, sheet_name= 'stocks', header = 0, index_c
 PORTFOLIO = pd.read_excel(PORTFOLIO_FILE, sheet_name = 'portfolio', header = 0, index_col = 0)
 CASH_ON_HAND = PORTFOLIO.loc['CASH'].value
 
+# STOCKS.loc["MSFT"].shares
 # ============================== SCRIPT
 for ticker in WATCHLIST:
     stock = af.Asset(ticker)
     print(ticker)
     print(stock.price)
     stock.get_rsi()
-    stock.get_current_holdings()
+    stock.get_current_holdings(STOCKS)
     rsi = stock.rsi
     print(rsi)
 
@@ -27,7 +28,6 @@ for ticker in WATCHLIST:
 
 print(STOCKS)
 print(PORTFOLIO)
-
 # ============================== TESTING
 # msft = yf.Ticker("MSFT")
 
@@ -41,3 +41,4 @@ print(PORTFOLIO)
 # msft.institutional_holders
 # msft.insider
 
+STOCKS
