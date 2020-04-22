@@ -1,21 +1,24 @@
-# LIBRARIES ==============================
-import yfinance as yf
+# ============================== LIBRARIES 
 import pandas as pd
+import yfinance as yf
 import numpy as np
 
-# OBJECTS, FUNCTIONS ==============================
+# ============================== OBJECTS, FUNCTIONS
 class Asset():
     def __init__(self, ticker, period = '2mo'):
         data = yf.Ticker(ticker)
         
         self.ticker = ticker
         self.history = data.history(period = period).Close
-        self.price = data.history(period = period).Close[-1] # extract latest price
+        self.price = data.history(period = period).Close[-1] # latest price
         self.shares = 0 # shares held in portfolio
         self.rsi = 0
 
-    def get_portfolio_data(self, df):
-        self.shares = df.loc[df.ticker == self.ticker].shares
+    def get_current_holdings(self, df):
+        try:
+            self.shares = df.loc[df.loc['ticker'] == self.ticker].shares
+        except:
+            print("No shares in portfolio")
 
     def buy_sell(self, buy_sell, num_shares, stocks_df, portfolio_df):
         if buy_sell == 'sell': 
@@ -33,6 +36,9 @@ class Asset():
     def update_stocks(self, stocks_df):
         asset = compile_asset()
         stocks_df.loc[self.ticker] = asset
+    
+    def get_rsi(self, period = 14, avg_method = 'sma'):
+        self.rsi = calc_rsi(self.history, period, avg_method)
 
     def compile_asset(self):
         asset = [self.ticker,
@@ -43,10 +49,6 @@ class Asset():
                 ]
         return asset
 
-    def rsi(self):
-        pass
-
-# REFERENCE LINK FOR AVERAGES (https://www.macroption.com/rsi-calculation/)
 def calc_sma(historicals, periods):
     period = historicals[-periods:]
     return np.mean(period)
@@ -85,15 +87,15 @@ def calc_rs(historicals, lookback_period, avg_method):
     rs = u_avg / d_avg
     return rs
 
-def calc_rsi(data, lookback_period, avg_method):
+def calc_rsi(data, lookback_period = 14, avg_method = 'sma'):
     relative_strength = calc_rs(data, lookback_period, avg_method)
     
     rsi = 100 - (100 / (1 + relative_strength))
     return rsi
 
-# TESTING ==============================
+# ============================== TESTING
 msft = yf.Ticker("MSFT")
 
 x = msft.history(period = '3wk')
-# calc_rsi(x.Close, 14, 'ema')
+calc_rsi(x.Close, 14, 'sma')
 
