@@ -26,8 +26,6 @@ class Asset():
         self.update_stocks(stocks_df)
         self.shares += num_shares
 
-
-
     def update_portfolio(self, cash_change, portfolio_df):
         portfolio_df.xs('CASH')['value'] -= cash_change
         portfolio_df.xs('STOCKS')['value'] += cash_change
@@ -53,21 +51,18 @@ def calc_sma(historicals, periods):
     period = historicals[-periods:]
     return np.mean(period)
 
-def calc_ema(historicals, period):
-    pass
-    # alpha = 2 / (period + 1)
+def calc_ema(historicals, periods):
+    alpha = (2 / (periods + 1))
+    n = historicals[-1]
+    avg_excl_n = np.mean(historicals[-periods:-1])
 
-def calc_wma(historicals, period):
-    pass
+    return (alpha * n) + (1 - alpha) * avg_excl_n
 
 def calc_rs(historicals, lookback_period, avg_method):
     u_changes = []
     d_changes = []
 
     historicals = historicals[-lookback_period:]
-    print(historicals)
-    print(historicals[2])
-    print(historicals[2] - historicals[2 - 1])
     for n in range(1, len(historicals)):
         chg = historicals[n] - historicals[n-1]
         if chg > 0: 
@@ -84,28 +79,21 @@ def calc_rs(historicals, lookback_period, avg_method):
         u_avg = calc_sma(u_changes, u_len-1)
         d_avg = calc_sma(d_changes, d_len-1)
     elif avg_method == 'ema':
-        u_avg = calc_ema(u_changes)
-        d_avg = calc_ema(d_changes)
-    elif avg_method == 'wma':
-        u_avg = calc_wma(u_changes)
-        d_avg = calc_wma(d_changes)
+        u_avg = calc_ema(u_changes, u_len-1)
+        d_avg = calc_ema(d_changes, d_len-1)
 
     rs = u_avg / d_avg
     return rs
 
 def calc_rsi(data, lookback_period, avg_method):
     relative_strength = calc_rs(data, lookback_period, avg_method)
-
-    avg_gain = 0
-    avg_loss = 0
-    rsi = 100 - [100 / (1 + relative_strength)]
+    
+    rsi = 100 - (100 / (1 + relative_strength))
     return rsi
 
-# TESTING ==================
+# TESTING ==============================
 msft = yf.Ticker("MSFT")
 
 x = msft.history(period = '3wk')
-calc_rsi(x.Close, 14, 'sma')
-calc_sma(x.Close, 2)
-
+# calc_rsi(x.Close, 14, 'ema')
 

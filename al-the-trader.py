@@ -17,6 +17,8 @@ msft.quarterly_cashflow
 msft.quarterly_balance_sheet
 msft.earnings
 msft.sustainability
-msft.history(period = '2wk')
+x = msft.history(period = '3wk')
 msft.actions
+msft.institutional_holders
+msft.insider
 
