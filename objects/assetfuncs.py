@@ -12,33 +12,37 @@ class Asset():
         self.price = data.history(period = period).Close[-1] # latest price
         self.shares = 0 # shares held in portfolio
         self.rsi = 0
+        self.last_activity = ''
 
     def buy_sell(self, buy_sell, num_shares, stocks_df, portfolio_df):
         if buy_sell == 'sell': 
             num_shares *= -1
-        cash_change = num_shares * self.price
+        cash_change = float(num_shares) * self.price
         
         self.get_current_holdings(stocks_df)
         self.shares += num_shares
+        self.last_activity = buy_sell
         self.update_portfolio(cash_change, portfolio_df)
         self.update_stocks(stocks_df)
 
     def get_current_holdings(self, stocks_df):
         try:
             self.shares = stocks_df.loc[self.ticker].shares
+            self.last_activity = stocks_df.loc[self.ticker].shares
         except KeyError:
             self.shares = 0
 
     def update_portfolio(self, cash_change, portfolio_df):
-        portfolio_df.xs('CASH')['value'] -= cash_change
-        portfolio_df.xs('STOCKS')['value'] += cash_change
+        portfolio_df.xs('CASH')['value'] -= float(cash_change)
+        portfolio_df.xs('STOCKS')['value'] += float(cash_change)
 
     def compile_asset(self):
         asset = [
                 self.price,
                 self.shares,
                 self.price * self.shares,
-                self.rsi
+                self.rsi, 
+                self.last_activity
                 ]
         return asset
 
@@ -48,7 +52,6 @@ class Asset():
     
     def get_rsi(self, period = 14, avg_method = 'sma'):
         self.rsi = calc_rsi(self.history, period, avg_method)
-
 
 def calc_sma(historicals, periods):
     period = historicals[-periods:]
