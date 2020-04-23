@@ -1,53 +1,29 @@
-# ============================== TO-DO
+# TO-DO
 """
-o Hold on buy/sell trigger if stock just recently passed indicator threshold (e.g., RSI)
+x Hold on buy/sell trigger if stock just recently passed indicator threshold (e.g., RSI)
+o Split trade funcs (gather ticker data, check triggers, write to excel)
 o Number of shares per trade (% based on portfolio size? diversification? price momentum?)
-o Additional buy/sell triggers (50 vs. 200 SMA, MACD)
-o Mechanics for auto-loading new WATCHLIST stocks (based on additional metrics: DCF, EPS | P/E, News)
-o Shorts/Margin trading 
+o Task schedule
+o Auto-email: Trade execution, portfolio value, relevant stock news
+o Bugs: 
+    o Portfolio sheet updating with wrong rsi? 
+    o Trades executing on wrong rsi
 """
 
-# ============================== LIBRARIES 
-import pandas as pd
-import yfinance as yf
+# LIBRARIES 
 from objects import assetfuncs as af
+from objects import algofuncs as alg
+from algofuncs import WATCHLIST, STOCKS, PORTFOLIO, CASH_ON_HAND
 import imp
-imp.reload(af)
+imp.reload(alg)
 
-# ============================== DECLARATIONS
-PORTFOLIO_FILE = pd.ExcelFile('portfolio.xlsx')
-WATCHLIST = pd.read_excel(PORTFOLIO_FILE, sheet_name= 'watchlist', header = 0).ticker
-STOCKS = pd.read_excel(PORTFOLIO_FILE, sheet_name= 'stocks', header = 0, index_col = 0)
-PORTFOLIO = pd.read_excel(PORTFOLIO_FILE, sheet_name = 'portfolio', header = 0, index_col = 0)
-CASH_ON_HAND = PORTFOLIO.loc['CASH'].value
-
-
-# ============================== ALGORITHM PARAMETERS
-RSI_upper = 65
-RSI_lower = 50
-
-# ============================== SCRIPT
+# SCRIPT
 for ticker in WATCHLIST:
-    stock = af.Asset(ticker)
-    stock.get_rsi()
-    rsi = stock.rsi
-    print(f"{ticker}: {rsi}")
-
-    stock_last_activity = '' 
-    try: 
-        stock_last_activity = STOCKS.loc[ticker].last_activity
-    except:
-        stock_last_activity = 'NA'
-    
-    if (stock_last_activity != 'buy') and (rsi < RSI_lower) and (CASH_ON_HAND > stock.price): 
-        stock.buy_sell('buy', 1, STOCKS, PORTFOLIO)
-    elif (stock_last_activity != 'sell') and (rsi > RSI_upper) and (stock.shares > 0): 
-        stock.buy_sell('sell', stock.shares, STOCKS, PORTFOLIO)
+    asset = alg.initialize_asset(ticker, ['rsi'], STOCKS, PORTFOLIO)
+    print(asset[0].rsi)
+    alg.determine_execute_trade(asset)
 
 print(STOCKS)
 print(PORTFOLIO)
 
-WRITER = pd.ExcelWriter('portfolio.xlsx')
-for df, sheet in zip([WATCHLIST, STOCKS, PORTFOLIO], ['watchlist', 'stocks','portfolio']):
-    df.to_excel(WRITER, sheet_name = sheet)
-WRITER.save()
+alg.update_workbook(WATCHLIST, STOCKS, PORTFOLIO)
