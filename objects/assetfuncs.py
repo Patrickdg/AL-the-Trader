@@ -96,10 +96,3 @@ def calc_rsi(data, lookback_period = 14, avg_method = 'sma'):
     
     rsi = 100 - (100 / (1 + relative_strength))
     return rsi
-
-# TESTING
-msft = yf.Ticker("MSFT")
-
-x = msft.history(period = '3wk')
-calc_rsi(x.Close, 14, 'sma')
-

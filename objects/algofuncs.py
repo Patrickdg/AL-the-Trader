@@ -72,6 +72,7 @@ def determine_execute_trade(asset_package):
         buy_sell = 'sell'
     else: 
         buy_sell = 'hold'
+        print(f"{asset.ticker}: HOLD {asset.shares}")
 
     if buy_sell in ['buy', 'sell']:
         execute_trade(asset, buy_sell, 1, STOCKS, PORTFOLIO)
