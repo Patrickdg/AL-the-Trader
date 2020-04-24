@@ -12,9 +12,10 @@ o Bugs:
 # LIBRARIES 
 from objects import assetfuncs as af
 from objects import algofuncs as alg
-from objects.algofuncs import WATCHLIST, STOCKS, PORTFOLIO, CASH_ON_HAND
+from objects.algofuncs import PORTFOLIO, WATCHLIST, STOCKS, TRADES, CASH_ON_HAND
 import imp
 imp.reload(alg)
+imp.reload(af)
 
 # SCRIPT
 for ticker in WATCHLIST:
@@ -25,4 +26,14 @@ for ticker in WATCHLIST:
 print(STOCKS)
 print(PORTFOLIO)
 
-alg.update_workbook(WATCHLIST, STOCKS, PORTFOLIO)
+alg.update_workbook(WATCHLIST, STOCKS, PORTFOLIO, TRADES)
+
+
+# TESTING
+# asset[0].update_trades('buy', 1, TRADES)
+
+# import pandas as pd
+# from datetime import datetime
+# trade_date = datetime.now().strftime(r"%d/%m/%Y %H:%M:%S")
+# test = pd.Series([trade_date, asset[0].ticker, 'buy', 1, 1*asset[0].price], index = TRADES.columns)
+# TRADES.append(test, ignore_index = True)

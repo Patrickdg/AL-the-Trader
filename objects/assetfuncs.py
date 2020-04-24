@@ -1,8 +1,10 @@
 # LIBRARIES 
-import yfinance as yf
+from datetime import datetime
 import numpy as np
+import pandas as pd
+import yfinance as yf
 
-# OBJECTS, FUNCTIONS
+# OBJECTS
 class Asset():
     def __init__(self, ticker, period = '2mo'):
         data = yf.Ticker(ticker)
@@ -14,7 +16,7 @@ class Asset():
         self.rsi = 0
         self.last_activity = ''
 
-    def buy_sell(self, buy_sell, num_shares, stocks_df, portfolio_df):
+    def buy_sell(self, buy_sell, num_shares, stocks_df, portfolio_df, trades_df):
         if buy_sell == 'sell': 
             num_shares *= -1
         cash_change = float(num_shares) * self.price
@@ -24,6 +26,7 @@ class Asset():
         self.last_activity = buy_sell
         self.update_portfolio(cash_change, portfolio_df)
         self.update_stocks(stocks_df)
+        self.update_trades(buy_sell, num_shares, trades_df)
 
     def get_current_holdings(self, stocks_df):
         try:
@@ -50,9 +53,17 @@ class Asset():
         asset = self.compile_asset()
         stocks_df.loc[self.ticker] = asset
     
+    def update_trades(self, buy_sell, num_shares, trades_df):
+        trade_date = datetime.now().strftime(r"%d/%m/%Y %H:%M:%S")
+        shares_value = self.price * num_shares
+        new_trade = pd.Series([trade_date, self.ticker, buy_sell, num_shares, shares_value])
+
+        trades_df.append(new_trade, ignore_index = True)
+
     def get_rsi(self, period = 14, avg_method = 'sma'):
         self.rsi = calc_rsi(self.history, period, avg_method)
 
+# INDICATOR FUNCTIONS
 def calc_sma(historicals, periods):
     period = historicals[-periods:]
     return np.mean(period)

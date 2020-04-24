@@ -7,9 +7,10 @@ imp.reload(af)
 
 # DECLARATIONS
 PORTFOLIO_FILE = pd.ExcelFile('portfolio.xlsx')
+PORTFOLIO = pd.read_excel(PORTFOLIO_FILE, sheet_name = 'portfolio', header = 0, index_col = 0)
 WATCHLIST = pd.read_excel(PORTFOLIO_FILE, sheet_name= 'watchlist', header = 0).ticker
 STOCKS = pd.read_excel(PORTFOLIO_FILE, sheet_name= 'stocks', header = 0, index_col = 0)
-PORTFOLIO = pd.read_excel(PORTFOLIO_FILE, sheet_name = 'portfolio', header = 0, index_col = 0)
+TRADES = pd.read_excel(PORTFOLIO_FILE, sheet_name= 'trades', header = 0)
 CASH_ON_HAND = PORTFOLIO.loc['CASH'].value
 
 # FUNCTIONS
@@ -55,8 +56,8 @@ def check_buy_sell(indicators_dict):
     return val
 
 # TRADE FUNCTION 
-def execute_trade(asset, buy_sell, n, stocks_df, portfolio_df):
-    asset.buy_sell(buy_sell, n, stocks_df, portfolio_df)
+def execute_trade(asset, buy_sell, n, stocks_df, portfolio_df, trades_df):
+    asset.buy_sell(buy_sell, n, stocks_df, portfolio_df, trades_df)
     print(f"{asset.ticker}: Order executed to {buy_sell} {n} share(s) at {asset.price}")
     
 def determine_execute_trade(asset_package):
@@ -75,11 +76,11 @@ def determine_execute_trade(asset_package):
         print(f"{asset.ticker}: HOLD {asset.shares}")
 
     if buy_sell in ['buy', 'sell']:
-        execute_trade(asset, buy_sell, 1, STOCKS, PORTFOLIO)
+        execute_trade(asset, buy_sell, 1, STOCKS, PORTFOLIO, TRADES)
 
 # INDICATOR FUNCTIONS
 ##RSI
-def check_rsi(rsi, min_max = [30,70]): 
+def check_rsi(rsi, min_max = [50,70]): 
     buy_sell = 'neutral'
     if rsi < min_max[0]: 
         buy_sell = 'buy'
@@ -94,8 +95,12 @@ def check_rsi(rsi, min_max = [30,70]):
 
 
 # EXCEL FUNCTIONS
-def update_workbook(watchlist, stocks_df, portfolio_df):
+def update_workbook(watchlist, stocks_df, portfolio_df, trades_df):
     writer = pd.ExcelWriter('portfolio.xlsx')
-    for df, sheet in zip([watchlist, stocks_df, portfolio_df], ['watchlist', 'stocks','portfolio']):
+    dfs = [watchlist, stocks_df, portfolio_df, trades_df]
+    sheet_names = ['watchlist', 'stocks','portfolio', 'trades']
+
+    for df, sheet in zip(dfs, sheet_names):
         df.to_excel(writer, sheet_name = sheet)
+
     writer.save()
