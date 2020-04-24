@@ -7,6 +7,7 @@ o Task schedule
 o Auto-email: Trade execution, portfolio value, relevant stock news
 o Bugs: 
     o RSI calcs?
+    x Sheets not updating during trade execution
 """
 
 # LIBRARIES 
@@ -19,21 +20,19 @@ imp.reload(af)
 
 # SCRIPT
 for ticker in WATCHLIST:
-    asset = alg.initialize_asset(ticker, ['rsi'], STOCKS, PORTFOLIO)
-    print(f"RSI: {asset[0].rsi}")
-    alg.determine_execute_trade(asset)
+    asset_pkg = alg.initialize_asset(ticker, ['rsi'], STOCKS, PORTFOLIO)
+    asset = asset_pkg[0]
 
-print(STOCKS)
+    buy_sell = alg.determine_trade(asset_pkg)
+    print(f"RSI: {asset.rsi}")
+    n = 1
+
+    if buy_sell != 'hold':
+        alg.execute_trade(asset, buy_sell, n, STOCKS, PORTFOLIO)
+        TRADES = alg.update_trades_df(asset, buy_sell, n, TRADES)
+
 print(PORTFOLIO)
+print(STOCKS)
+print(TRADES)
 
 alg.update_workbook(WATCHLIST, STOCKS, PORTFOLIO, TRADES)
-
-
-# TESTING
-# asset[0].update_trades('buy', 1, TRADES)
-
-# import pandas as pd
-# from datetime import datetime
-# trade_date = datetime.now().strftime(r"%d/%m/%Y %H:%M:%S")
-# test = pd.Series([trade_date, asset[0].ticker, 'buy', 1, 1*asset[0].price], index = TRADES.columns)
-# TRADES.append(test, ignore_index = True)

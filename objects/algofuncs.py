@@ -1,5 +1,6 @@
 # LIBRARIES
 import pandas as pd
+from datetime import datetime
 from collections import Counter
 from objects import assetfuncs as af
 import imp
@@ -56,11 +57,7 @@ def check_buy_sell(indicators_dict):
     return val
 
 # TRADE FUNCTION 
-def execute_trade(asset, buy_sell, n, stocks_df, portfolio_df, trades_df):
-    asset.buy_sell(buy_sell, n, stocks_df, portfolio_df, trades_df)
-    print(f"{asset.ticker}: Order executed to {buy_sell} {n} share(s) at {asset.price}")
-    
-def determine_execute_trade(asset_package):
+def determine_trade(asset_package):
     asset = asset_package[0]
     cash_available = True if CASH_ON_HAND > asset.price else False
     stock_last_activity = asset_package[1]
@@ -74,9 +71,19 @@ def determine_execute_trade(asset_package):
     else: 
         buy_sell = 'hold'
         print(f"{asset.ticker}: HOLD {asset.shares}")
+    
+    return buy_sell
 
-    if buy_sell in ['buy', 'sell']:
-        execute_trade(asset, buy_sell, 1, STOCKS, PORTFOLIO, TRADES)
+def execute_trade(asset, buy_sell, n, stocks_df, portfolio_df):
+    asset.buy_sell(buy_sell, n, stocks_df, portfolio_df)
+    print(f"{asset.ticker}: Order executed to {buy_sell} {n} share(s) at {asset.price}")
+
+def update_trades_df(asset, buy_sell, n, trades_df):
+    trade_date = datetime.now().strftime(r"%d/%m/%Y %H:%M:%S")
+    shares_value = asset.price * n
+    new_trade = pd.Series([trade_date, asset.ticker, buy_sell, n, shares_value], index = trades_df.columns)
+
+    return trades_df.append(new_trade, ignore_index = True)    
 
 # INDICATOR FUNCTIONS
 ##RSI
