@@ -5,14 +5,17 @@ o Split trade funcs (gather ticker data, check triggers, write to excel)
 o Number of shares per trade (% based on portfolio size? diversification? price momentum?)
 o Task schedule
 o Auto-email: Trade execution, portfolio value, relevant stock news
+o Update portfolio stock value 
 o Bugs: 
     o RSI calcs?
     x Sheets not updating during trade execution
 """
 
 # LIBRARIES 
+from datetime import datetime
 from objects import assetfuncs as af
 from objects import algofuncs as alg
+from objects.algofuncs import EMAIL_ADDRESS, EMAIL_PASSWORD 
 from objects.algofuncs import PORTFOLIO, WATCHLIST, STOCKS, TRADES, CASH_ON_HAND
 import imp
 imp.reload(alg)
@@ -36,3 +39,21 @@ print(STOCKS)
 print(TRADES)
 
 alg.update_workbook(WATCHLIST, STOCKS, PORTFOLIO, TRADES)
+
+# SUMMARY EMAIL
+##Extract today's trades
+current_dt = datetime.now()
+if current_dt.hour >= 10 and current_dt.minute >= 25: # Past 3:30PM local?
+    day = current_dt.strftime("%d/%m/%Y")
+    trades_executed = TRADES.loc[TRADES.date.str[0:10] == day]
+
+    ##Extract ending portfolio values
+    email = {'subject': f"AL: Portfolio Summary - {day}",
+            'body': 
+                f"""
+                Trades Executed:\n {trades_executed}\n\n
+                Current Holdings:\n {STOCKS}\n\n
+                Total Portfolio Summary:\n {PORTFOLIO}
+                """}
+    
+    alg.send_email(email)

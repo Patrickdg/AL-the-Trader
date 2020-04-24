@@ -1,4 +1,6 @@
 # LIBRARIES
+import os
+import smtplib
 import pandas as pd
 from datetime import datetime
 from collections import Counter
@@ -7,6 +9,9 @@ import imp
 imp.reload(af)
 
 # DECLARATIONS
+EMAIL_ADDRESS = os.environ.get('AL_EMAIL')
+EMAIL_PASSWORD = os.environ.get('AL_PASS')
+
 PORTFOLIO_FILE = pd.ExcelFile('portfolio.xlsx')
 PORTFOLIO = pd.read_excel(PORTFOLIO_FILE, sheet_name = 'portfolio', header = 0, index_col = 0)
 WATCHLIST = pd.read_excel(PORTFOLIO_FILE, sheet_name= 'watchlist', header = 0).ticker
@@ -87,7 +92,7 @@ def update_trades_df(asset, buy_sell, n, trades_df):
 
 # INDICATOR FUNCTIONS
 ##RSI
-def check_rsi(rsi, min_max = [50,70]): 
+def check_rsi(rsi, min_max = [30,70]): 
     buy_sell = 'neutral'
     if rsi < min_max[0]: 
         buy_sell = 'buy'
@@ -101,7 +106,9 @@ def check_rsi(rsi, min_max = [50,70]):
 ##50SMA - 200SMA
 
 
-# EXCEL FUNCTIONS
+# OTHER FUNCTIONS
+
+##EXCEL
 def update_workbook(watchlist, stocks_df, portfolio_df, trades_df):
     writer = pd.ExcelWriter('portfolio.xlsx')
     dfs = [watchlist, stocks_df, portfolio_df, trades_df]
@@ -111,3 +118,29 @@ def update_workbook(watchlist, stocks_df, portfolio_df, trades_df):
         df.to_excel(writer, sheet_name = sheet)
 
     writer.save()
+
+##EMAIL
+def send_email(email):
+    email_df_format()
+    
+    smtp = smtplib.SMTP('smtp.gmail.com', 587)
+    smtp.ehlo()
+    smtp.starttls()
+    smtp.ehlo()
+
+    smtp.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+
+    subject = email['subject']
+    body = email['body']
+
+    to_send = f'Subject: {subject}\n\n{body}'
+
+    smtp.sendmail(EMAIL_ADDRESS, 'deguzmap20@gmail.com', to_send)
+    smtp.quit()
+
+def email_df_format():
+    pd.set_option('display.max_rows', None)
+    pd.set_option('display.max_columns', None)
+    pd.set_option('display.width', None)
+    pd.set_option('display.max_colwidth', -1)
+    pd.options.display.max_rows
