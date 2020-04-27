@@ -8,6 +8,7 @@ o Task scheduler
 - Auto-email: 
     x Initial build & send
     x Trade execution, portfolio value df formatting
+    o EOD email trigger
 o Bugs: 
     x Sheets not updating during trade execution
 """

@@ -1,5 +1,5 @@
 # LIBRARIES
-import os
+import inspect, os
 import pandas as pd
 from datetime import datetime
 from collections import Counter
@@ -13,6 +13,11 @@ import imp
 imp.reload(af)
 
 # DECLARATIONS
+# inspect.getfile(inspect.currentframe()) # script filename (usually with path)
+# abs_path = os.path.abspath(inspect.getfile(inspect.currentframe()))
+# dir_name = os.path.dirname(abs_path)
+# os.chdir(dir_name)
+
 EMAIL_ADDRESS = os.environ.get('AL_EMAIL')
 EMAIL_PASSWORD = os.environ.get('AL_PASS')
 
@@ -161,12 +166,15 @@ def send_email(trades_df, stocks_df, portfolio_df):
     message = MIMEMultipart(
         "alternative", None, [MIMEText(text), MIMEText(html,'html')])
 
-    message['Subject'] = "Your data"
+    message['Subject'] = f"Trading Summary - {datetime.now()}"
     message['From'] = sender
     message['To'] = recipient
+
     server = smtplib.SMTP(server)
     server.ehlo()
     server.starttls()
     server.login(sender, password)
+    
     server.sendmail(sender, recipient, message.as_string())
+
     server.quit()
