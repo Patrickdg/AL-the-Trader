@@ -1,13 +1,14 @@
 # TO-DO
 """
 x Hold on buy/sell trigger if stock just recently passed indicator threshold (e.g., RSI)
-o Split trade funcs (gather ticker data, check triggers, write to excel)
+x Update portfolio stock value 
+x Split trade funcs (gather ticker data, check triggers, write to excel)
 o Number of shares per trade (% based on portfolio size? diversification? price momentum?)
-o Task schedule
-o Auto-email: Trade execution, portfolio value, relevant stock news
-o Update portfolio stock value 
+o Task scheduler
+- Auto-email: 
+    x Initial build & send
+    x Trade execution, portfolio value df formatting
 o Bugs: 
-    o RSI calcs?
     x Sheets not updating during trade execution
 """
 
@@ -33,27 +34,25 @@ for ticker in WATCHLIST:
     if buy_sell != 'hold':
         alg.execute_trade(asset, buy_sell, n, STOCKS, PORTFOLIO)
         TRADES = alg.update_trades_df(asset, buy_sell, n, TRADES)
+    elif buy_sell == 'hold' and asset.shares > 0:
+        asset.update_stocks(STOCKS)
+        STOCKS.loc[asset.ticker, 'current_price'] = asset.price 
+        STOCKS.loc[asset.ticker, 'value'] = asset.price * asset.shares
 
-print(PORTFOLIO)
-print(STOCKS)
-print(TRADES)
-
+PORTFOLIO.loc['STOCKS'].value = STOCKS.value.sum()
 alg.update_workbook(WATCHLIST, STOCKS, PORTFOLIO, TRADES)
 
 # SUMMARY EMAIL
 ##Extract today's trades
 current_dt = datetime.now()
-if current_dt.hour >= 10 and current_dt.minute >= 25: # Past 3:30PM local?
-    day = current_dt.strftime("%d/%m/%Y")
-    trades_executed = TRADES.loc[TRADES.date.str[0:10] == day]
+day = current_dt.strftime("%d/%m/%Y")
+trades_executed = TRADES.loc[TRADES.date.str[0:10] == day]
 
-    ##Extract ending portfolio values
-    email = {'subject': f"AL: Portfolio Summary - {day}",
-            'body': 
-                f"""
-                Trades Executed:\n {trades_executed}\n\n
-                Current Holdings:\n {STOCKS}\n\n
-                Total Portfolio Summary:\n {PORTFOLIO}
-                """}
-    
-    alg.send_email(email)
+# Add total column to PORTFOLIO df
+PORTFOLIO.loc['Total'] = PORTFOLIO.value.sum()
+alg.send_email(trades_executed, STOCKS, PORTFOLIO)
+
+# TESTING
+# print(PORTFOLIO)
+# print(STOCKS)
+# print(TRADES)

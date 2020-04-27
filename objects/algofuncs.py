@@ -1,9 +1,13 @@
 # LIBRARIES
 import os
-import smtplib
 import pandas as pd
 from datetime import datetime
 from collections import Counter
+
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import smtplib
+
 from objects import assetfuncs as af
 import imp
 imp.reload(af)
@@ -16,7 +20,7 @@ PORTFOLIO_FILE = pd.ExcelFile('portfolio.xlsx')
 PORTFOLIO = pd.read_excel(PORTFOLIO_FILE, sheet_name = 'portfolio', header = 0, index_col = 0)
 WATCHLIST = pd.read_excel(PORTFOLIO_FILE, sheet_name= 'watchlist', header = 0).ticker
 STOCKS = pd.read_excel(PORTFOLIO_FILE, sheet_name= 'stocks', header = 0, index_col = 0)
-TRADES = pd.read_excel(PORTFOLIO_FILE, sheet_name= 'trades', header = 0)
+TRADES = pd.read_excel(PORTFOLIO_FILE, sheet_name= 'trades', header = 0, index_col = 0)
 CASH_ON_HAND = PORTFOLIO.loc['CASH'].value
 
 # FUNCTIONS
@@ -103,11 +107,7 @@ def check_rsi(rsi, min_max = [30,70]):
 
     return buy_sell
 
-##50SMA - 200SMA
-
-
 # OTHER FUNCTIONS
-
 ##EXCEL
 def update_workbook(watchlist, stocks_df, portfolio_df, trades_df):
     writer = pd.ExcelWriter('portfolio.xlsx')
@@ -120,27 +120,53 @@ def update_workbook(watchlist, stocks_df, portfolio_df, trades_df):
     writer.save()
 
 ##EMAIL
-def send_email(email):
-    email_df_format()
-    
-    smtp = smtplib.SMTP('smtp.gmail.com', 587)
-    smtp.ehlo()
-    smtp.starttls()
-    smtp.ehlo()
+def send_email(trades_df, stocks_df, portfolio_df):
+    sender = EMAIL_ADDRESS
+    password = EMAIL_PASSWORD
+    server = 'smtp.gmail.com:587'
+    recipient = 'deguzmap20@gmail.com'
 
-    smtp.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+    text = f"""
+    AL here! 
 
-    subject = email['subject']
-    body = email['body']
+    Here is a summary of the last EXECUTED TRADES:
 
-    to_send = f'Subject: {subject}\n\n{body}'
+    {trades_df}
 
-    smtp.sendmail(EMAIL_ADDRESS, 'deguzmap20@gmail.com', to_send)
-    smtp.quit()
+    CURRENT HOLDINGS: 
 
-def email_df_format():
-    pd.set_option('display.max_rows', None)
-    pd.set_option('display.max_columns', None)
-    pd.set_option('display.width', None)
-    pd.set_option('display.max_colwidth', -1)
-    pd.options.display.max_rows
+    {stocks_df}
+
+    PORTFOLIO SUMMARY:
+
+    {portfolio_df}
+  
+    - AL
+    """
+
+    html = f"""
+    <html><body><p>AL here!</p>
+    <p>Here is a summary of the last EXECUTED TRADES:</p>
+    {trades_df.to_html()}
+    <p>CURRENT HOLDINGS:</p>
+    {stocks_df.to_html()}
+    <p>PORTFOLIO SUMMARY:</p>
+    {portfolio_df.to_html()}
+    <p>- AL</p>
+    </body></html>
+    """
+
+    # text = text.format(table=df)
+    # html = html.format(table=df)
+    message = MIMEMultipart(
+        "alternative", None, [MIMEText(text), MIMEText(html,'html')])
+
+    message['Subject'] = "Your data"
+    message['From'] = sender
+    message['To'] = recipient
+    server = smtplib.SMTP(server)
+    server.ehlo()
+    server.starttls()
+    server.login(sender, password)
+    server.sendmail(sender, recipient, message.as_string())
+    server.quit()

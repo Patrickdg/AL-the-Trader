@@ -48,6 +48,7 @@ class Asset():
         return asset
 
     def update_stocks(self, stocks_df):
+        self.get_current_holdings(stocks_df)
         asset = self.compile_asset()
         stocks_df.loc[self.ticker] = asset
     
