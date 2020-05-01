@@ -19,6 +19,7 @@ EMAIL_PASSWORD = os.environ.get('AL_PASS')
 
 PORTFOLIO_FILE = pd.ExcelFile('portfolio.xlsx')
 PORTFOLIO = pd.read_excel(PORTFOLIO_FILE, sheet_name = 'portfolio', header = 0, index_col = 0)
+PORTFOLIO_HIST = pd.read_excel(PORTFOLIO_FILE, sheet_name = 'summary', header = 0, index_col = 0)
 WATCHLIST = pd.read_excel(PORTFOLIO_FILE, sheet_name= 'watchlist', header = 0).ticker
 STOCKS = pd.read_excel(PORTFOLIO_FILE, sheet_name= 'stocks', header = 0, index_col = 0)
 TRADES = pd.read_excel(PORTFOLIO_FILE, sheet_name= 'trades', header = 0, index_col = 0)
@@ -106,10 +107,10 @@ def todays_trades(trades_df):
     return trades_executed
 
 ##EXCEL
-def update_workbook(watchlist, stocks_df, portfolio_df, trades_df):
+def update_workbook(watchlist, stocks_df, portfolio_df, trades_df, portfolio_hist):
     writer = pd.ExcelWriter('portfolio.xlsx')
-    dfs = [watchlist, stocks_df, portfolio_df, trades_df]
-    sheet_names = ['watchlist', 'stocks','portfolio', 'trades']
+    dfs = [watchlist, stocks_df, portfolio_df, trades_df, portfolio_hist]
+    sheet_names = ['watchlist', 'stocks','portfolio', 'trades', 'summary']
 
     for df, sheet in zip(dfs, sheet_names):
         df.to_excel(writer, sheet_name = sheet)

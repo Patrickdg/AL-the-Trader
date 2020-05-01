@@ -17,7 +17,7 @@ from datetime import datetime
 from objects import assetfuncs as af
 from objects import algofuncs as alg
 from objects.algofuncs import EMAIL_ADDRESS, EMAIL_PASSWORD 
-from objects.algofuncs import PORTFOLIO, WATCHLIST, STOCKS, TRADES, CASH_ON_HAND
+from objects.algofuncs import PORTFOLIO, PORTFOLIO_HIST, WATCHLIST, STOCKS, TRADES, CASH_ON_HAND
 import imp
 imp.reload(alg)
 imp.reload(af)
@@ -53,10 +53,13 @@ for ticker in WATCHLIST:
     if asset.shares > 0: 
         STOCKS.loc[asset.ticker] = asset.compiled
 # Update dfs
+current_date = datetime.now().strftime(r"%d/%m/%Y %H:%M:%S")
+
 PORTFOLIO.loc['STOCKS'].value = STOCKS.value.sum()
-alg.update_workbook(WATCHLIST, STOCKS, PORTFOLIO, TRADES)
 PORTFOLIO.loc['TOTAL'] = sum([PORTFOLIO.loc['CASH'].value,
                               PORTFOLIO.loc['STOCKS'].value])
+PORTFOLIO_HIST.loc[current_date] = PORTFOLIO.transpose().values[0]
+alg.update_workbook(WATCHLIST, STOCKS, PORTFOLIO, TRADES, PORTFOLIO_HIST)
 
 # SUMMARY EMAIL
 trades_executed = alg.todays_trades(TRADES)
