@@ -24,71 +24,53 @@ TRADES = pd.read_excel(PORTFOLIO_FILE, sheet_name= 'trades', header = 0, index_c
 CASH_ON_HAND = PORTFOLIO.loc['CASH'].value
 
 # FUNCTIONS
-def initialize_asset(ticker, indicators, stocks_df, portfolio_df):
+def initialize_asset(ticker, stocks_df):
     asset = af.Asset(ticker)
-
     asset.update_values(stocks_df)
 
-    indicator_vals = check_indicators(asset, indicators)
-    buy_sell_inds = check_buy_sell(indicator_vals)
-
-    asset_package = [asset, 
-                    stock_last_activity, 
-                    indicator_vals, 
-                    buy_sell_inds]
-    
-    return asset_package
+    return asset
 
 def check_indicators(asset, indicators):
+    # Returns final 'buy' or 'sell' command from indicators
     # Update dict to include any new indicators (SMA, MACD, BB, etc.)
-    # Format: 'indicator': [asset.calculation, asset.indicator_value, check_ind_function()]
-    indicator_dict = {'rsi': [asset.get_rsi(), check_rsi(asset.rsi)]} 
+    # Format: 'indicator': [check_ind()]
+    indicator_dict = {'rsi': check_rsi(asset.rsi)} 
     
-    indicator_vals = {}
+    indicator_orders = {}
     for ind in indicators: 
-        indicator_dict[ind][0] # calculate indicator value
-        buy_sell = indicator_dict[ind][1] # use appropriate check_indicator function
-        indicator_vals[ind] = buy_sell 
+        buy_sell = indicator_dict[ind]
+        indicator_orders[ind] = buy_sell 
     
-    return indicator_vals
-
-def check_buy_sell(indicators_dict):
-    vals = indicators_dict.values()
-    val, count = Counter(vals).most_common()[0]
-    return val
+    orders = indicator_orders.values()
+    order, count = Counter(orders).most_common()[0]
+    return order
 
 # TRADE FUNCTION 
-def determine_trade(asset_package):
-    asset = asset_package[0]
-    cash_available = True if CASH_ON_HAND > asset.price else False
-    stock_last_activity = asset_package[1]
-    buy_sell_inds = asset_package[3]
+def check_tradable(asset, buy_sell, num_shares, stocks_df, portfolio_df):
+    tradable = False
 
-    buy_sell = ''
-    if stock_last_activity != 'buy' and buy_sell_inds == 'buy' and cash_available:
-        buy_sell = 'buy'
-    elif stock_last_activity != 'sell' and buy_sell_inds == 'sell' and asset.shares > 0:
-        buy_sell = 'sell'
-    else: 
-        buy_sell = 'hold'
-        print(f"{asset.ticker}: HOLD {asset.shares}")
+    cash_available = True if portfolio_df.loc['CASH'].value > asset.price else False
+    last_activity = asset.last_activity
+
+    if buy_sell == 'buy' and cash_available and last_activity != 'buy': 
+        tradable = True
+    elif buy_sell == 'sell' and asset.shares > num_shares and last_activity != 'sell': 
+        tradable = True
     
-    return buy_sell
+    return tradable
 
-def execute_trade(asset, buy_sell, n, stocks_df, portfolio_df):
-    asset.buy_sell(buy_sell, n, stocks_df, portfolio_df)
-    print(f"{asset.ticker}: Order executed to {buy_sell} {n} share(s) at {asset.price}")
-
-def update_trades_df(asset, buy_sell, n, trades_df):
+def execute_trade(asset, buy_sell, num_shares, stocks_df, portfolio_df, trades_df):
+    # @ asset-level
+    asset.buy_sell(buy_sell, num_shares) 
+    # @ portfolio-level
     trade_date = datetime.now().strftime(r"%d/%m/%Y %H:%M:%S")
-    shares_value = asset.price * n
-    new_trade = pd.Series([trade_date, asset.ticker, buy_sell, n, shares_value], index = trades_df.columns)
-
-    return trades_df.append(new_trade, ignore_index = True)    
+    shares_value = asset.price * num_shares
+    executed = pd.Series([trade_date, asset.ticker, buy_sell, num_shares, shares_value], index = trades_df.columns)
+    return executed 
 
 # INDICATOR FUNCTIONS
 ##RSI
-def check_rsi(rsi, min_max = [40,60]): 
+def check_rsi(rsi, min_max = [45,55]): 
     buy_sell = 'neutral'
     if rsi < min_max[0]: 
         buy_sell = 'buy'

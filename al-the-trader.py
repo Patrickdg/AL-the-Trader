@@ -26,21 +26,27 @@ imp.reload(af)
 
 # SCRIPT
 for ticker in WATCHLIST:
-    asset_pkg = alg.initialize_asset(ticker, ['rsi'], STOCKS, PORTFOLIO)
-    asset = asset_pkg[0]
+    # Initialize asset
+    asset = alg.initialize_asset(ticker, STOCKS)
 
-    buy_sell = alg.determine_trade(asset_pkg)
+    # Check triggers & determine action
     print(f"RSI: {asset.rsi}")
-    print(f"Price: {asset.price}\n")
-    n = 1 # num shares to buy
+    print(f"Price: {asset.price}")
+    order = alg.check_indicators(asset, ['rsi']) #buy, sell, or neutral
+    num_shares = 1 # TEMPORARY: num shares to buy
 
-    if buy_sell != 'hold':
-        alg.execute_trade(asset, buy_sell, n, STOCKS, PORTFOLIO)
-        TRADES = alg.update_trades_df(asset, buy_sell, n, TRADES)
-    elif buy_sell == 'hold' and asset.shares > 0:
-        asset.update_stocks(STOCKS)
-        STOCKS.loc[asset.ticker, 'current_price'] = asset.price 
-        STOCKS.loc[asset.ticker, 'value'] = asset.price * asset.shares
+    if order != 'neutral': 
+        tradable = alg.check_tradable(asset, order, num_shares, STOCKS, PORTFOLIO)
+        if tradable:
+            trade = alg.execute_trade(asset, order, num_shares, STOCKS, PORTFOLIO, TRADES)
+            # Update portfolio dfs
+            TRADES.append(trade, ignore_index = True)
+            STOCKS.loc[asset.ticker] = asset.compiled
+            PORTFOLIO.loc['CASH'] += asset.cash_change
+    else:
+        if asset.shares > 0:
+            STOCKS.loc[asset.ticker] = asset.compiled
+            print(f"\n{asset.ticker}: Hold at {asset.price}")
 
 PORTFOLIO.loc['STOCKS'].value = STOCKS.value.sum()
 alg.update_workbook(WATCHLIST, STOCKS, PORTFOLIO, TRADES)

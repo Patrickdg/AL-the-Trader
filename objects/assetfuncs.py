@@ -15,56 +15,48 @@ class Asset():
         self.rsi = calc_rsi(self.history)
         self.last_activity = ''
         self.compiled = []
+        self.cash_change = 0
 
     def get_current_holdings(self, stocks_df):
-        try:
-            self.shares = stocks_df.loc[self.ticker].shares
-            self.last_activity = stocks_df.loc[self.ticker].last_activity
-        except KeyError:
-            self.shares = 0
-            self.last_activity = 'NA'
+        if self.last_activity == '':
+            try:
+                self.shares = stocks_df.loc[self.ticker].shares
+                self.last_activity = stocks_df.loc[self.ticker].last_activity
+            except KeyError:
+                self.shares = 0
+                self.last_activity = 'NA'
 
-    def get_rsi(self, period = 14, avg_method = 'sma'):
-        self.rsi = calc_rsi(self.history, period, avg_method)
+    def update_compile(self):
+        self.compiled = [
+                    self.price,
+                    self.shares,
+                    self.price * self.shares,
+                    self.rsi, 
+                    self.last_activity
+                    ]
 
     def update_values(self, stocks_df):
-        # Compilation method to update prior to insert into 'STOCKS' df
         self.get_current_holdings(stocks_df)
-        asset = [
-                self.price,
-                self.shares,
-                self.price * self.shares,
-                self.rsi, 
-                self.last_activity
-                ]
-        self.compiled = asset
+        self.update_compile()
+        
+    def get_rsi(self, period = 14, avg_method = 'sma'):
+        self.rsi = calc_rsi(self.history, period, avg_method)
         
     def buy_sell(self, buy_sell, num_shares):
         if buy_sell == 'sell': 
             num_shares *= -1
         cash_change = float(num_shares) * self.price
         
-        self.get_current_holdings(stocks_df)
         self.shares += num_shares
         self.last_activity = buy_sell
-        self.update_portfolio(cash_change, portfolio_df)
-        self.update_stocks(stocks_df)
+        self.cash_change = cash_change
 
-        return cash_change
+        self.update_compile()
 
-
-    def update_portfolio(self, cash_change, portfolio_df):
-        portfolio_df.xs('CASH')['value'] -= float(cash_change)
-        portfolio_df.xs('STOCKS')['value'] += float(cash_change)
-
-
-    def update_stocks(self, stocks_df):
-        self.get_current_holdings(stocks_df)
-        asset = self.compiled
-        stocks_df.loc[self.ticker] = asset
-    
+        print(f"{self.ticker}: Order executed to {buy_sell} {num_shares} share(s) at {self.price}")
 
 # INDICATOR FUNCTIONS
+##RSI
 def calc_sma(historicals, periods):
     period = historicals[-periods:]
     return np.mean(period)
