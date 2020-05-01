@@ -54,8 +54,9 @@ for ticker in WATCHLIST:
         STOCKS.loc[asset.ticker] = asset.compiled
 # Update dfs
 PORTFOLIO.loc['STOCKS'].value = STOCKS.value.sum()
-PORTFOLIO.loc['Total'] = PORTFOLIO.value.sum()
 alg.update_workbook(WATCHLIST, STOCKS, PORTFOLIO, TRADES)
+PORTFOLIO.loc['TOTAL'] = sum([PORTFOLIO.loc['CASH'].value,
+                              PORTFOLIO.loc['STOCKS'].value])
 
 # SUMMARY EMAIL
 trades_executed = alg.todays_trades(TRADES)
