@@ -3,6 +3,8 @@
 ## Description 
 Automated stock paper-trading algorithm using daily triggers to simulate buy/sell transactions on specified watchlist. **Only intended for simulation and demonstration purposes, NOT for live trading.**
 
+Current version tracks the 30 stocks in the DOW (as of May 1, 2020).
+
 ## Domains 
 - Python (scraping, triggers, & transactions)
     - pandas (wrangling), yfinance (scraping)
