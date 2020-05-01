@@ -4,12 +4,13 @@ x Hold on buy/sell trigger if stock just recently passed indicator threshold (e.
 x Update portfolio stock value 
 x Split trade funcs (gather ticker data, check triggers, write to excel)
 o Number of shares per trade (% based on portfolio size? diversification? price momentum?)
-o Task scheduler
+x Task scheduler
 - Auto-email: 
     x Initial build & send
     x Trade execution, portfolio value df formatting
     o EOD email trigger
-o Bugs: 
+- Bugs: 
+    o Stock price not updating
     x Sheets not updating during trade execution
 """
 
@@ -30,7 +31,8 @@ for ticker in WATCHLIST:
 
     buy_sell = alg.determine_trade(asset_pkg)
     print(f"RSI: {asset.rsi}")
-    n = 1
+    print(f"Price: {asset.price}\n")
+    n = 1 # num shares to buy
 
     if buy_sell != 'hold':
         alg.execute_trade(asset, buy_sell, n, STOCKS, PORTFOLIO)
@@ -49,11 +51,13 @@ current_dt = datetime.now()
 day = current_dt.strftime("%d/%m/%Y")
 trades_executed = TRADES.loc[TRADES.date.str[0:10] == day]
 
-# Add total column to PORTFOLIO df
+##Add total column to PORTFOLIO df
 PORTFOLIO.loc['Total'] = PORTFOLIO.value.sum()
-alg.send_email(trades_executed, STOCKS, PORTFOLIO)
+
+##Email Send
+# alg.send_email(trades_executed, STOCKS, PORTFOLIO)
 
 # TESTING
-# print(PORTFOLIO)
-# print(STOCKS)
-# print(TRADES)
+print(PORTFOLIO)
+print(STOCKS)
+print(TRADES)

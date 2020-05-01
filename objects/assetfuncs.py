@@ -10,10 +10,17 @@ class Asset():
         
         self.ticker = ticker
         self.history = data.history(period = period).Close
-        self.price = data.history(period = period).Close[-1] # latest price
+        self.price = data.history(period = period).Close[-1]
         self.shares = 0 # shares held in portfolio
         self.rsi = 0
         self.last_activity = ''
+        self.compiled = [
+                self.price, 
+                self.shares, 
+                self.price * self.shares, 
+                self.rsi,
+                self.last_activity
+                ]
 
     def buy_sell(self, buy_sell, num_shares, stocks_df, portfolio_df):
         if buy_sell == 'sell': 
@@ -45,11 +52,11 @@ class Asset():
                 self.rsi, 
                 self.last_activity
                 ]
-        return asset
+        self.compiled = asset
 
     def update_stocks(self, stocks_df):
         self.get_current_holdings(stocks_df)
-        asset = self.compile_asset()
+        asset = self.compiled
         stocks_df.loc[self.ticker] = asset
     
     def get_rsi(self, period = 14, avg_method = 'sma'):

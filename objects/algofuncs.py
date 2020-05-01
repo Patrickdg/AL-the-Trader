@@ -13,11 +13,6 @@ import imp
 imp.reload(af)
 
 # DECLARATIONS
-# inspect.getfile(inspect.currentframe()) # script filename (usually with path)
-# abs_path = os.path.abspath(inspect.getfile(inspect.currentframe()))
-# dir_name = os.path.dirname(abs_path)
-# os.chdir(dir_name)
-
 EMAIL_ADDRESS = os.environ.get('AL_EMAIL')
 EMAIL_PASSWORD = os.environ.get('AL_PASS')
 
@@ -101,7 +96,7 @@ def update_trades_df(asset, buy_sell, n, trades_df):
 
 # INDICATOR FUNCTIONS
 ##RSI
-def check_rsi(rsi, min_max = [30,70]): 
+def check_rsi(rsi, min_max = [40,60]): 
     buy_sell = 'neutral'
     if rsi < min_max[0]: 
         buy_sell = 'buy'
