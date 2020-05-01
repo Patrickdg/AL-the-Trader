@@ -3,7 +3,7 @@
 x Hold on buy/sell trigger if stock just recently passed indicator threshold (e.g., RSI)
 x Update portfolio stock value 
 x Split trade funcs (gather ticker data, check triggers, write to excel)
-o Number of shares per trade (% based on portfolio size? diversification? price momentum?)
+x Number of shares per trade (% based on portfolio size? diversification? price momentum?)
 x Task scheduler
 - Auto-email: 
     x Initial build & send
@@ -33,7 +33,7 @@ for ticker in WATCHLIST:
 
     # Check triggers & determine action
     order = alg.check_indicators(asset, ['rsi']) #buy, sell, or neutral
-    num_shares = 1 # TEMPORARY: num shares to buy
+    num_shares = alg.buyable_shares(asset.price, CASH_ON_HAND)  # TEMPORARY: num shares to buy
 
     if order != 'neutral': 
         # Check if portfolio contains enough cash/shares to buy/sell, and last activity

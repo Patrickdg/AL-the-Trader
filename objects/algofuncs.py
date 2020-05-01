@@ -3,6 +3,7 @@ import inspect, os
 import pandas as pd
 from datetime import datetime
 from collections import Counter
+import math
 
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -47,6 +48,15 @@ def check_indicators(asset, indicators):
     return order
 
 # TRADE FUNCTION 
+def buyable_shares(asset_price, cash_on_hand):
+    num_shares = 0
+    maximum = 0.1 * cash_on_hand
+    if asset_price < maximum:
+        num_shares = math.floor(maximum/asset_price)
+    else:
+        num_shares = 1
+    return num_shares
+
 def check_tradable(asset, buy_sell, num_shares, stocks_df, portfolio_df):
     tradable = ''
     cash_available = ''
