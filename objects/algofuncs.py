@@ -27,7 +27,8 @@ CASH_ON_HAND = PORTFOLIO.loc['CASH'].value
 def initialize_asset(ticker, indicators, stocks_df, portfolio_df):
     asset = af.Asset(ticker)
 
-    stock_last_activity = get_last_activity(ticker, stocks_df)
+    asset.update_values(stocks_df)
+
     indicator_vals = check_indicators(asset, indicators)
     buy_sell_inds = check_buy_sell(indicator_vals)
 
@@ -37,15 +38,6 @@ def initialize_asset(ticker, indicators, stocks_df, portfolio_df):
                     buy_sell_inds]
     
     return asset_package
-
-def get_last_activity(ticker, stocks_df):
-    stock_last_activity = ''
-    try: 
-        stock_last_activity = stocks_df.loc[ticker].last_activity
-    except:
-        stock_last_activity = 'NA'
-
-    return stock_last_activity
 
 def check_indicators(asset, indicators):
     # Update dict to include any new indicators (SMA, MACD, BB, etc.)
