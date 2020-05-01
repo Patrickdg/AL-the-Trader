@@ -53,7 +53,7 @@ class Asset():
 
         self.update_compile()
 
-        print(f"{self.ticker}: Order executed to {buy_sell} {num_shares} share(s) at {self.price}")
+        print(f"{self.ticker}: Order executed to {buy_sell} {num_shares} share(s) at {self.price}\n")
 
 # INDICATOR FUNCTIONS
 ##RSI

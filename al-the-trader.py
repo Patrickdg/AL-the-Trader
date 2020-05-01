@@ -9,9 +9,7 @@ x Task scheduler
     x Initial build & send
     x Trade execution, portfolio value df formatting
     o EOD email trigger
-- Bugs: 
-    o Stock price not updating
-    x Sheets not updating during trade execution
+x Bugs: 
 """
 
 # LIBRARIES 
@@ -24,46 +22,46 @@ import imp
 imp.reload(alg)
 imp.reload(af)
 
-# SCRIPT
+# MAIN
 for ticker in WATCHLIST:
     # Initialize asset
     asset = alg.initialize_asset(ticker, STOCKS)
 
-    # Check triggers & determine action
+    print(asset.ticker)
     print(f"RSI: {asset.rsi}")
     print(f"Price: {asset.price}")
+
+    # Check triggers & determine action
     order = alg.check_indicators(asset, ['rsi']) #buy, sell, or neutral
     num_shares = 1 # TEMPORARY: num shares to buy
 
     if order != 'neutral': 
+        # Check if portfolio contains enough cash/shares to buy/sell, and last activity
         tradable = alg.check_tradable(asset, order, num_shares, STOCKS, PORTFOLIO)
         if tradable:
             trade = alg.execute_trade(asset, order, num_shares, STOCKS, PORTFOLIO, TRADES)
-            # Update portfolio dfs
-            TRADES.append(trade, ignore_index = True)
-            STOCKS.loc[asset.ticker] = asset.compiled
-            PORTFOLIO.loc['CASH'] += asset.cash_change
+            TRADES = TRADES.append(trade, ignore_index = True)
+            PORTFOLIO.loc['CASH'].value -= asset.cash_change
+            # Update STOCKS df to remove unowned tickers, or update with new values
+            if asset.shares == 0: 
+                STOCKS.drop(asset.ticker, inplace = True)
+        else:
+            print(f"{asset.ticker}: Hold at {asset.price}\n")
     else:
-        if asset.shares > 0:
-            STOCKS.loc[asset.ticker] = asset.compiled
-            print(f"\n{asset.ticker}: Hold at {asset.price}")
+        print(f"{asset.ticker}: Hold at {asset.price}\n")
 
+    if asset.shares > 0: 
+        STOCKS.loc[asset.ticker] = asset.compiled
+# Update dfs
 PORTFOLIO.loc['STOCKS'].value = STOCKS.value.sum()
+PORTFOLIO.loc['Total'] = PORTFOLIO.value.sum()
 alg.update_workbook(WATCHLIST, STOCKS, PORTFOLIO, TRADES)
 
 # SUMMARY EMAIL
-##Extract today's trades
-current_dt = datetime.now()
-day = current_dt.strftime("%d/%m/%Y")
-trades_executed = TRADES.loc[TRADES.date.str[0:10] == day]
+trades_executed = alg.todays_trades(TRADES)
+alg.send_email(trades_executed, STOCKS, PORTFOLIO)
 
-##Add total column to PORTFOLIO df
-PORTFOLIO.loc['Total'] = PORTFOLIO.value.sum()
-
-##Email Send
-# alg.send_email(trades_executed, STOCKS, PORTFOLIO)
-
-# TESTING
-print(PORTFOLIO)
-print(STOCKS)
-print(TRADES)
+# # TESTING
+# print(PORTFOLIO)
+# print(STOCKS)
+# print(TRADES)

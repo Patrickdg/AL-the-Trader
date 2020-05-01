@@ -43,20 +43,25 @@ def check_indicators(asset, indicators):
     
     orders = indicator_orders.values()
     order, count = Counter(orders).most_common()[0]
+    print(order)
     return order
 
 # TRADE FUNCTION 
 def check_tradable(asset, buy_sell, num_shares, stocks_df, portfolio_df):
-    tradable = False
-
-    cash_available = True if portfolio_df.loc['CASH'].value > asset.price else False
+    tradable = ''
+    cash_available = ''
     last_activity = asset.last_activity
+
+    if portfolio_df.loc['CASH'].value > asset.price*num_shares:
+        cash_available = True
+    else: 
+        cash_available = False
 
     if buy_sell == 'buy' and cash_available and last_activity != 'buy': 
         tradable = True
-    elif buy_sell == 'sell' and asset.shares > num_shares and last_activity != 'sell': 
+    elif buy_sell == 'sell' and asset.shares >= num_shares and last_activity != 'sell': 
         tradable = True
-    
+
     return tradable
 
 def execute_trade(asset, buy_sell, num_shares, stocks_df, portfolio_df, trades_df):
@@ -70,7 +75,7 @@ def execute_trade(asset, buy_sell, num_shares, stocks_df, portfolio_df, trades_d
 
 # INDICATOR FUNCTIONS
 ##RSI
-def check_rsi(rsi, min_max = [45,55]): 
+def check_rsi(rsi, min_max = [30,70]): 
     buy_sell = 'neutral'
     if rsi < min_max[0]: 
         buy_sell = 'buy'
@@ -82,6 +87,14 @@ def check_rsi(rsi, min_max = [45,55]):
     return buy_sell
 
 # OTHER FUNCTIONS
+##TODAY'S TRADES
+def todays_trades(trades_df):
+    current_dt = datetime.now()
+    day = current_dt.strftime("%d/%m/%Y")
+    trades_executed = trades_df.loc[trades_df.date.str[0:10] == day]
+
+    return trades_executed
+
 ##EXCEL
 def update_workbook(watchlist, stocks_df, portfolio_df, trades_df):
     writer = pd.ExcelWriter('portfolio.xlsx')
