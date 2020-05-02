@@ -9,7 +9,6 @@ x Task scheduler
     x Initial build & send
     x Trade execution, portfolio value df formatting
     o EOD email trigger
-x Bugs: 
 """
 
 # LIBRARIES 

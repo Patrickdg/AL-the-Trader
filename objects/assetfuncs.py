@@ -100,9 +100,3 @@ def calc_rsi(data, lookback_period = 14, avg_method = 'sma'):
     
     rsi = 100 - (100 / (1 + relative_strength))
     return rsi
-
-# TESTING
-x = Asset("MSFT")
-x.price
-x.history
-x.rsi
