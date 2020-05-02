@@ -5,6 +5,8 @@ Automated stock paper-trading algorithm using daily triggers to simulate buy/sel
 
 Current version tracks the 30 stocks in the DOW (as of May 1, 2020).
 
+###**[Live Dashboard - Portfolio Summary](https://public.tableau.com/profile/patrick.de.guzman5555#!/vizhome/ALtheTrader-PortfolioSummary/Dashboard1)**
+
 ## Domains 
 - Python (scraping, triggers, & transactions)
     - pandas (wrangling), yfinance (scraping)
