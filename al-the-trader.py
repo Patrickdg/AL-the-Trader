@@ -23,7 +23,7 @@ imp.reload(alg)
 imp.reload(af)
 
 # MAIN
-for ticker in WATCHLIST.index:
+for ticker in WATCHLIST.index[:5]:
     # Initialize asset
     asset = alg.initialize_asset(ticker, STOCKS)
 
@@ -58,12 +58,12 @@ for ticker in WATCHLIST.index:
     if asset.shares > 0: 
         STOCKS.loc[asset.ticker] = asset.compiled
 # Update dfs
-current_date = datetime.now().strftime(r"%d/%m/%Y %H:%M:%S")
+current_date = datetime.now()
 
 PORTFOLIO.loc['STOCKS'].value = STOCKS.value.sum()
 PORTFOLIO.loc['TOTAL'] = sum([PORTFOLIO.loc['CASH'].value,
                               PORTFOLIO.loc['STOCKS'].value])
-PORTFOLIO_HIST.loc[current_date] = PORTFOLIO.transpose().values[0]
+PORTFOLIO_HIST.loc[current_date.strftime("%d/%m/%Y %H:%M:%S")] = PORTFOLIO.transpose().values[0]
 WATCHLIST.sort_values(by = 'rsi', inplace = True)
 
 alg.update_workbook(WATCHLIST, STOCKS, PORTFOLIO, TRADES, PORTFOLIO_HIST)
