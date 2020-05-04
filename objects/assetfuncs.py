@@ -11,6 +11,8 @@ class Asset():
         self.ticker = ticker
         self.history = data.history(period = period).Close
         self.price = data.history(period = period).Close[-1]
+        self.prev = data.history(period = period).Close[-2]
+        self.trend = round(((self.price / self.prev) - 1) * 100, 4)
         self.shares = 0 # shares held in portfolio
         self.rsi = calc_rsi(self.history)
         self.last_activity = ''

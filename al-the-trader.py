@@ -5,10 +5,11 @@ x Update portfolio stock value
 x Split trade funcs (gather ticker data, check triggers, write to excel)
 x Number of shares per trade (% based on portfolio size? diversification? price momentum?)
 x Task scheduler
+x Update WATCHLIST: include current price, trend (% change), current ind vals
 - Auto-email: 
     x Initial build & send
     x Trade execution, portfolio value df formatting
-    o EOD email trigger
+    o EOD email trigger (complete after Week 1 TESTING)
 """
 
 # LIBRARIES 
@@ -22,7 +23,7 @@ imp.reload(alg)
 imp.reload(af)
 
 # MAIN
-for ticker in WATCHLIST:
+for ticker in WATCHLIST.index:
     # Initialize asset
     asset = alg.initialize_asset(ticker, STOCKS)
 
@@ -33,6 +34,11 @@ for ticker in WATCHLIST:
     # Check triggers & determine action
     order = alg.check_indicators(asset, ['rsi']) #buy, sell, or neutral
     num_shares = alg.buyable_shares(asset.price, CASH_ON_HAND)  # TEMPORARY: num shares to buy
+
+    # Update WATCHLIST df: price, trend (% change), indicator values
+    WATCHLIST.loc[ticker, 'price'] = asset.price
+    WATCHLIST.loc[ticker, 'pct_change'] = asset.trend
+    WATCHLIST.loc[ticker, 'rsi'] = asset.rsi
 
     if order != 'neutral': 
         # Check if portfolio contains enough cash/shares to buy/sell, and last activity
@@ -58,6 +64,8 @@ PORTFOLIO.loc['STOCKS'].value = STOCKS.value.sum()
 PORTFOLIO.loc['TOTAL'] = sum([PORTFOLIO.loc['CASH'].value,
                               PORTFOLIO.loc['STOCKS'].value])
 PORTFOLIO_HIST.loc[current_date] = PORTFOLIO.transpose().values[0]
+WATCHLIST.sort_values(by = 'rsi', inplace = True)
+
 alg.update_workbook(WATCHLIST, STOCKS, PORTFOLIO, TRADES, PORTFOLIO_HIST)
 
 # SUMMARY EMAIL
