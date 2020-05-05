@@ -23,7 +23,7 @@ imp.reload(alg)
 imp.reload(af)
 
 # MAIN
-for ticker in WATCHLIST.index[:5]:
+for ticker in WATCHLIST.index:
     # Initialize asset
     asset = alg.initialize_asset(ticker, STOCKS)
 

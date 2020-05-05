@@ -70,44 +70,26 @@ def calc_ema(historicals, periods):
 
     return (alpha * n) + (1 - alpha) * avg_excl_n
 
-def calc_rs(historicals, lookback_period, avg_method):
+def calc_rs(historicals, lookback_period = 14, avg_method = 'sma'):
     u_changes = []
     d_changes = []
 
-    historicals = historicals[-lookback_period+1:]
-    for n in range(1, len(historicals)):
+    historicals = historicals[-(lookback_period):]
+    for n in range(1, lookback_period):
         chg = round(historicals[n] - historicals[n-1], 4)
         if chg > 0: 
             u_changes.append(chg)
         elif chg < 0: 
             d_changes.append(abs(chg))
-    u_len = len(u_changes)
-    d_len = len(d_changes)
 
-    print(u_changes)
-    print(d_changes)
+    u_avg = np.mean(u_changes)
+    d_avg = np.mean(d_changes)
 
-    u_avg = ''
-    d_avg = ''
-    if avg_method == 'sma':
-        u_avg = calc_sma(u_changes, u_len)
-        d_avg = calc_sma(d_changes, d_len)
-    elif avg_method == 'ema':
-        u_avg = calc_ema(u_changes, u_len)
-        d_avg = calc_ema(d_changes, d_len)
-
-    print(u_avg)
-    print(d_avg)
     rs = u_avg / d_avg
-    print(f"rs = {rs}")
     return rs
 
-def calc_rsi(data, lookback_period = 14, avg_method = 'sma'):
+def calc_rsi(data, lookback_period = 10, avg_method = 'sma'):
     relative_strength = calc_rs(data, lookback_period, avg_method)
     
     rsi = 100 - (100 / (1 + relative_strength))
     return rsi
-
-x = asset.history
-calc_rs(x, 14, 'sma')
-calc_rsi(x, 14, 'sma')
