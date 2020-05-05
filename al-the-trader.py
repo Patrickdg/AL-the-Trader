@@ -1,11 +1,7 @@
 # TO-DO
 """
-x Hold on buy/sell trigger if stock just recently passed indicator threshold (e.g., RSI)
-x Update portfolio stock value 
-x Split trade funcs (gather ticker data, check triggers, write to excel)
 x Number of shares per trade (% based on portfolio size? diversification? price momentum?)
-x Task scheduler
-x Update WATCHLIST: include current price, trend (% change), current ind vals
+o Updates to dfs: add daily growth 
 - Auto-email: 
     x Initial build & send
     x Trade execution, portfolio value df formatting

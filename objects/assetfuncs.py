@@ -13,26 +13,36 @@ class Asset():
         self.price = data.history(period = period).Close[-1]
         self.prev = data.history(period = period).Close[-2]
         self.trend = round(((self.price / self.prev) - 1) * 100, 4)
+
         self.shares = 0 # shares held in portfolio
-        self.rsi = calc_rsi(self.history)
+        self.purch_price = ''
+        self.performance = ''
         self.last_activity = ''
+
+        self.rsi = calc_rsi(self.history)
         self.compiled = []
         self.cash_change = 0
 
     def get_current_holdings(self, stocks_df):
         if self.last_activity == '':
             try:
+                self.purch_price = stocks_df.loc[self.ticker].purch_price
                 self.shares = stocks_df.loc[self.ticker].shares
                 self.last_activity = stocks_df.loc[self.ticker].last_activity
+                self.performance = round(((self.price / self.purch_price) - 1) * 100, 4)
             except KeyError:
+                self.purch_price = 'NA'
                 self.shares = 0
                 self.last_activity = 'NA'
+                self.performance = 'NA'
 
     def update_compile(self):
         self.compiled = [
+                    self.purch_price,
                     self.price,
                     self.shares,
                     self.price * self.shares,
+                    self.performance,
                     self.rsi, 
                     self.last_activity
                     ]
