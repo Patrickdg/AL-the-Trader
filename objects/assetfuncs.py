@@ -61,6 +61,7 @@ class Asset():
         
         self.shares += num_shares
         self.last_activity = buy_sell
+        self.purch_price = self.price
         self.cash_change = cash_change
 
         self.update_compile()
