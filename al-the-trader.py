@@ -1,7 +1,7 @@
 # NOTES
 """
 "AL" currently trades on a simple Relative Strength Index (RSI) trigger (30 buy, 70 sell)
-with a shortened lookback period of 10 days. 
+with a simple moving average (SMA) and shortened lookback period of 10 days. 
 
 Current watchlist contains the 30 stocks in the DJIA, as of May 1, 2020. 
 """
