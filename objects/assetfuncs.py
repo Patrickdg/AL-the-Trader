@@ -81,7 +81,7 @@ def calc_ema(historicals, periods):
 
     return (alpha * n) + (1 - alpha) * avg_excl_n
 
-def calc_rs(historicals, lookback_period = 14, avg_method = 'sma'):
+def calc_rs(historicals, lookback_period = 10, avg_method = 'sma'):
     u_changes = []
     d_changes = []
 
