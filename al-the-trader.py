@@ -16,14 +16,13 @@ import imp
 imp.reload(alg)
 imp.reload(af)
 
+# DECLARATIONS
+current_date = datetime.now()
+
 # MAIN
 for ticker in WATCHLIST.index:
     # Initialize asset
     asset = alg.initialize_asset(ticker, STOCKS)
-
-    print(asset.ticker)
-    print(f"RSI: {asset.rsi}")
-    print(f"Price: {asset.price}")
 
     # Check triggers & determine action
     order = alg.check_indicators(asset, ['rsi']) #buy, sell, or neutral
@@ -51,22 +50,22 @@ for ticker in WATCHLIST.index:
 
     if asset.shares > 0: 
         STOCKS.loc[asset.ticker] = asset.compiled
-# Update dfs
-current_date = datetime.now()
 
+# Update dfs
 PORTFOLIO.loc['STOCKS'].value = STOCKS.value.sum()
 PORTFOLIO.loc['TOTAL'] = sum([PORTFOLIO.loc['CASH'].value,
-                              PORTFOLIO.loc['STOCKS'].value])
+                            PORTFOLIO.loc['STOCKS'].value])
+
+PORTFOLIO_HIST = PORTFOLIO_HIST.loc[PORTFOLIO_HIST.index.str[0:10] != current_date.strftime("%d/%m/%Y")]
 PORTFOLIO_HIST.loc[current_date.strftime("%d/%m/%Y %H:%M:%S")] = PORTFOLIO.transpose().values[0]
+
 WATCHLIST.sort_values(by = 'rsi', inplace = True)
 
 alg.update_workbook(WATCHLIST, STOCKS, PORTFOLIO, TRADES, PORTFOLIO_HIST)
 
 # SUMMARY EMAIL
-trades_executed = alg.todays_trades(TRADES)
-alg.send_email(trades_executed, STOCKS, PORTFOLIO)
-
-# # TESTING
-# print(PORTFOLIO)
-# print(STOCKS)
-# print(TRADES)
+if current_date.hour >= 16:
+    trades_executed = alg.todays_trades(TRADES)
+    alg.send_email(trades_executed, STOCKS, PORTFOLIO)
+else: 
+    pass

@@ -45,7 +45,6 @@ def check_indicators(asset, indicators):
     
     orders = indicator_orders.values()
     order, count = Counter(orders).most_common()[0]
-    print(order)
     return order
 
 # TRADE FUNCTION 
