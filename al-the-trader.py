@@ -1,11 +1,9 @@
-# TO-DO
+# NOTES
 """
-x Number of shares per trade (% based on portfolio size? diversification? price momentum?)
-o Updates to dfs: add daily growth 
-- Auto-email: 
-    x Initial build & send
-    x Trade execution, portfolio value df formatting
-    o EOD email trigger (complete after Week 1 TESTING)
+"AL" currently trades on a simple Relative Strength Index (RSI) trigger (30 buy, 70 sell)
+with a shortened lookback period of 10 days. 
+
+Current watchlist contains the 30 stocks in the DJIA, as of May 1, 2020. 
 """
 
 # LIBRARIES 

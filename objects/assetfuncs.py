@@ -51,7 +51,7 @@ class Asset():
         self.get_current_holdings(stocks_df)
         self.update_compile()
         
-    def get_rsi(self, period = 14, avg_method = 'sma'):
+    def get_rsi(self, period = 10, avg_method = 'sma'):
         self.rsi = calc_rsi(self.history, period, avg_method)
         
     def buy_sell(self, buy_sell, num_shares):
