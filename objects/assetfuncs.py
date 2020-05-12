@@ -82,19 +82,14 @@ def calc_ema(historicals, periods):
     return (alpha * n) + (1 - alpha) * avg_excl_n
 
 def calc_rs(historicals, lookback_period = 10, avg_method = 'sma'):
-    u_changes = []
-    d_changes = []
+    historicals = historicals[-(lookback_period+1):]
+    delta = historicals.diff()
+    
+    u_changes = delta[delta > 0]
+    d_changes = delta[delta < 0].map(abs)
 
-    historicals = historicals[-(lookback_period):]
-    for n in range(1, lookback_period):
-        chg = round(historicals[n] - historicals[n-1], 4)
-        if chg > 0: 
-            u_changes.append(chg)
-        elif chg < 0: 
-            d_changes.append(abs(chg))
-
-    u_avg = np.mean(u_changes)
-    d_avg = np.mean(d_changes)
+    u_avg = sum(u_changes)/lookback_period
+    d_avg = sum(d_changes)/lookback_period
 
     rs = u_avg / d_avg
     return rs
