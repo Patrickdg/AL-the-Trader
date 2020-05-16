@@ -14,6 +14,20 @@ import imp
 imp.reload(af)
 
 # DECLARATIONS
+##SHEETS
+KEY = os.environ.get('GS_KEY')
+
+SCOPE = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+CREDS = ServiceAccountCredentials.from_json_keyfile_name(KEY, SCOPE)
+CLIENT = gspread.authorize(CREDS)
+
+watch_test = CLIENT.open('AL the Trader').worksheet('watchlist')
+port_test = CLIENT.open('AL the Trader').worksheet('portfolio')
+stocks_test = CLIENT.open('AL the Trader').worksheet('stocks')
+trades_test = CLIENT.open('AL the Trader').worksheet('trades')
+summary_test = CLIENT.open('AL the Trader').worksheet('summary')
+
+##WORKBOOK
 EMAIL_ADDRESS = os.environ.get('AL_EMAIL')
 EMAIL_PASSWORD = os.environ.get('AL_PASS')
 
