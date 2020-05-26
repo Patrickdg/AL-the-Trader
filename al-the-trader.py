@@ -37,6 +37,7 @@ for ticker in WATCHLIST.index:
         # Check if portfolio contains enough cash/shares to buy/sell, and last activity
         tradable = alg.check_tradable(asset, order, num_shares, STOCKS, PORTFOLIO)
         if tradable:
+            num_shares = asset.shares if order == 'sell' else num_shares # sell all shares, buy only buyable 
             trade = alg.execute_trade(asset, order, num_shares, STOCKS, PORTFOLIO, TRADES)
             TRADES = TRADES.append(trade, ignore_index = True)
             PORTFOLIO.loc['CASH'].value -= asset.cash_change
