@@ -5,6 +5,9 @@ from datetime import datetime
 from collections import Counter
 import math
 
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
@@ -13,8 +16,10 @@ from objects import assetfuncs as af
 import imp
 imp.reload(af)
 
+
 # DECLARATIONS
 ##SHEETS
+<<<<<<< HEAD
 PORTFOLIO_FILE = pd.ExcelFile('portfolio.xlsx')
 PORTFOLIO = pd.read_excel(PORTFOLIO_FILE, sheet_name = 'portfolio', header = 0, index_col = 0)
 PORTFOLIO_HIST = pd.read_excel(PORTFOLIO_FILE, sheet_name = 'summary', header = 0, index_col = 0)
@@ -22,6 +27,25 @@ WATCHLIST = pd.read_excel(PORTFOLIO_FILE, sheet_name= 'watchlist', header = 0, i
 STOCKS = pd.read_excel(PORTFOLIO_FILE, sheet_name= 'stocks', header = 0, index_col = 0)
 TRADES = pd.read_excel(PORTFOLIO_FILE, sheet_name= 'trades', header = 0, index_col = 0)
 CASH_ON_HAND = PORTFOLIO.loc['CASH'].value
+=======
+KEY = os.environ.get('AL_GS_KEY')
+
+SCOPE = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+CREDS = ServiceAccountCredentials.from_json_keyfile_name(KEY, SCOPE)
+CLIENT = gspread.authorize(CREDS)
+
+PORTFOLIO = CLIENT.open('AL-portfolio').worksheet('portfolio')
+PORTFOLIO_HIST = CLIENT.open('AL-portfolio').worksheet('summary')
+WATCHLIST = CLIENT.open('AL-portfolio').worksheet('watchlist')
+STOCKS = CLIENT.open('AL-portfolio').worksheet('stocks')
+TRADES = CLIENT.open('AL-portfolio').worksheet('trades')
+CASH_ON_HAND = PORTFOLIO.loc['CASH'].value
+
+##EMAIL
+EMAIL_ADDRESS = os.environ.get('AL_EMAIL')
+EMAIL_PASSWORD = os.environ.get('AL_PASS')
+
+>>>>>>> 0f9aef9a6c9562bee0b4473aef1f91571c5aa4c2
 
 ##EMAIL
 EMAIL_ADDRESS = os.environ.get('AL_EMAIL')
