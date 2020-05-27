@@ -5,6 +5,9 @@ from datetime import datetime
 from collections import Counter
 import math
 
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
@@ -13,38 +16,31 @@ from objects import assetfuncs as af
 import imp
 imp.reload(af)
 
+
 # DECLARATIONS
 ##SHEETS
+KEY = os.environ.get('AL_GS_KEY')
 
-# KEY = os.environ.get('GS_KEY')
+SCOPE = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+CREDS = ServiceAccountCredentials.from_json_keyfile_name(KEY, SCOPE)
+CLIENT = gspread.authorize(CREDS)
 
-# SCOPE = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-# CREDS = ServiceAccountCredentials.from_json_keyfile_name(KEY, SCOPE)
-# CLIENT = gspread.authorize(CREDS)
+PORTFOLIO = CLIENT.open('AL-portfolio').worksheet('portfolio')
+PORTFOLIO_HIST = CLIENT.open('AL-portfolio').worksheet('summary')
+WATCHLIST = CLIENT.open('AL-portfolio').worksheet('watchlist')
+STOCKS = CLIENT.open('AL-portfolio').worksheet('stocks')
+TRADES = CLIENT.open('AL-portfolio').worksheet('trades')
+CASH_ON_HAND = PORTFOLIO.loc['CASH'].value
 
-# watch_test = CLIENT.open('AL the Trader').worksheet('watchlist')
-# port_test = CLIENT.open('AL the Trader').worksheet('portfolio')
-# stocks_test = CLIENT.open('AL the Trader').worksheet('stocks')
-# trades_test = CLIENT.open('AL the Trader').worksheet('trades')
-# summary_test = CLIENT.open('AL the Trader').worksheet('summary')
-
-##WORKBOOK
+##EMAIL
 EMAIL_ADDRESS = os.environ.get('AL_EMAIL')
 EMAIL_PASSWORD = os.environ.get('AL_PASS')
 
-PORTFOLIO_FILE = pd.ExcelFile('portfolio.xlsx')
-PORTFOLIO = pd.read_excel(PORTFOLIO_FILE, sheet_name = 'portfolio', header = 0, index_col = 0)
-PORTFOLIO_HIST = pd.read_excel(PORTFOLIO_FILE, sheet_name = 'summary', header = 0, index_col = 0)
-WATCHLIST = pd.read_excel(PORTFOLIO_FILE, sheet_name= 'watchlist', header = 0, index_col = 0)
-STOCKS = pd.read_excel(PORTFOLIO_FILE, sheet_name= 'stocks', header = 0, index_col = 0)
-TRADES = pd.read_excel(PORTFOLIO_FILE, sheet_name= 'trades', header = 0, index_col = 0)
-CASH_ON_HAND = PORTFOLIO.loc['CASH'].value
 
 # FUNCTIONS
 def initialize_asset(ticker, stocks_df):
     asset = af.Asset(ticker)
     asset.update_values(stocks_df)
-
     return asset
 
 def check_indicators(asset, indicators):
@@ -108,7 +104,6 @@ def check_rsi(rsi, min_max = [30,70]):
         buy_sell = 'sell'
     else:
         pass
-
     return buy_sell
 
 # OTHER FUNCTIONS
@@ -117,7 +112,6 @@ def todays_trades(trades_df):
     current_dt = datetime.now()
     day = current_dt.strftime("%d/%m/%Y")
     trades_executed = trades_df.loc[trades_df.date.str[0:10] == day]
-
     return trades_executed
 
 ##EXCEL
@@ -181,7 +175,6 @@ def send_email(trades_df, stocks_df, portfolio_df):
     server.ehlo()
     server.starttls()
     server.login(sender, password)
-    
     server.sendmail(sender, recipient, message.as_string())
 
     server.quit()
