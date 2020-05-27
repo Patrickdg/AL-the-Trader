@@ -14,9 +14,7 @@ import imp
 imp.reload(af)
 
 # DECLARATIONS
-EMAIL_ADDRESS = os.environ.get('AL_EMAIL')
-EMAIL_PASSWORD = os.environ.get('AL_PASS')
-
+##SHEETS
 PORTFOLIO_FILE = pd.ExcelFile('portfolio.xlsx')
 PORTFOLIO = pd.read_excel(PORTFOLIO_FILE, sheet_name = 'portfolio', header = 0, index_col = 0)
 PORTFOLIO_HIST = pd.read_excel(PORTFOLIO_FILE, sheet_name = 'summary', header = 0, index_col = 0)
@@ -25,11 +23,15 @@ STOCKS = pd.read_excel(PORTFOLIO_FILE, sheet_name= 'stocks', header = 0, index_c
 TRADES = pd.read_excel(PORTFOLIO_FILE, sheet_name= 'trades', header = 0, index_col = 0)
 CASH_ON_HAND = PORTFOLIO.loc['CASH'].value
 
+##EMAIL
+EMAIL_ADDRESS = os.environ.get('AL_EMAIL')
+EMAIL_PASSWORD = os.environ.get('AL_PASS')
+
+
 # FUNCTIONS
 def initialize_asset(ticker, stocks_df):
     asset = af.Asset(ticker)
     asset.update_values(stocks_df)
-
     return asset
 
 def check_indicators(asset, indicators):
@@ -93,7 +95,6 @@ def check_rsi(rsi, min_max = [30,70]):
         buy_sell = 'sell'
     else:
         pass
-
     return buy_sell
 
 # OTHER FUNCTIONS
@@ -102,7 +103,6 @@ def todays_trades(trades_df):
     current_dt = datetime.now()
     day = current_dt.strftime("%d/%m/%Y")
     trades_executed = trades_df.loc[trades_df.date.str[0:10] == day]
-
     return trades_executed
 
 ##EXCEL
@@ -166,7 +166,6 @@ def send_email(trades_df, stocks_df, portfolio_df):
     server.ehlo()
     server.starttls()
     server.login(sender, password)
-    
     server.sendmail(sender, recipient, message.as_string())
 
     server.quit()
