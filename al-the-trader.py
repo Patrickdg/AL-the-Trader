@@ -19,38 +19,66 @@ imp.reload(af)
 # DECLARATIONS
 current_date = datetime.now()
 
+manual = False
+
 # MAIN
-for ticker in WATCHLIST.index:
-    # Initialize asset
-    asset = alg.initialize_asset(ticker, STOCKS)
+if manual: 
+    ### temporary for manual sell trades - current bug: not selling @ rsi > 70.
+    tickers = ['PG','MRK'] # SET MANUAL TICKERS
 
-    # Check triggers & determine action
-    order = alg.check_indicators(asset, ['rsi']) #buy, sell, or neutral
-    num_shares = alg.buyable_shares(asset.price, CASH_ON_HAND)  # TEMPORARY: num shares to buy
+    for ticker in tickers: 
+        asset = alg.initialize_asset(ticker, STOCKS)
 
-    # Update WATCHLIST df: price, trend (% change), indicator values
-    WATCHLIST.loc[ticker, 'price'] = asset.price
-    WATCHLIST.loc[ticker, 'pct_change'] = asset.trend
-    WATCHLIST.loc[ticker, 'rsi'] = asset.rsi
+        order = 'sell'
+        num_shares = asset.shares
 
-    if order != 'neutral': 
-        # Check if portfolio contains enough cash/shares to buy/sell, and last activity
-        tradable = alg.check_tradable(asset, order, num_shares, STOCKS, PORTFOLIO)
-        if tradable:
-            num_shares = asset.shares if order == 'sell' else num_shares # sell all shares, buy only buyable 
-            trade = alg.execute_trade(asset, order, num_shares, STOCKS, PORTFOLIO, TRADES)
-            TRADES = TRADES.append(trade, ignore_index = True)
-            PORTFOLIO.loc['CASH'].value -= asset.cash_change
-            # Update STOCKS df to remove unowned tickers, or update with new values
-            if asset.shares == 0: 
-                STOCKS.drop(asset.ticker, inplace = True)
+        # Update WATCHLIST df: price, trend (% change), indicator values
+        WATCHLIST.loc[ticker, 'price'] = asset.price
+        WATCHLIST.loc[ticker, 'pct_change'] = asset.trend
+        WATCHLIST.loc[ticker, 'rsi'] = asset.rsi
+
+        # Trade 
+        trade = alg.execute_trade(asset, order, num_shares, STOCKS, PORTFOLIO, TRADES)
+        TRADES = TRADES.append(trade, ignore_index = True)
+        PORTFOLIO.loc['CASH'].value -= asset.cash_change
+
+        # Update STOCKS df to remove unowned tickers, or update with new values
+        if asset.shares == 0: 
+            STOCKS.drop(asset.ticker, inplace = True)
+        elif asset.shares > 0: 
+            STOCKS.loc[asset.ticker] = asset.compiled
+else: 
+    for ticker in WATCHLIST.index:
+        # Initialize asset
+        asset = alg.initialize_asset(ticker, STOCKS)
+
+        # Check triggers & determine action
+        order = alg.check_indicators(asset, ['rsi']) #buy, sell, or neutral
+        num_shares = alg.buyable_shares(asset.price, CASH_ON_HAND)  # TEMPORARY: num shares to buy
+
+        # Update WATCHLIST df: price, trend (% change), indicator values
+        WATCHLIST.loc[ticker, 'price'] = asset.price
+        WATCHLIST.loc[ticker, 'pct_change'] = asset.trend
+        WATCHLIST.loc[ticker, 'rsi'] = asset.rsi
+
+        if order != 'neutral': 
+            # Check if portfolio contains enough cash/shares to buy/sell, and last activity
+            tradable = alg.check_tradable(asset, order, num_shares, STOCKS, PORTFOLIO)
+            if tradable:
+                num_shares = asset.shares if order == 'sell' else num_shares # sell all shares, buy only buyable 
+                trade = alg.execute_trade(asset, order, num_shares, STOCKS, PORTFOLIO, TRADES)
+                TRADES = TRADES.append(trade, ignore_index = True)
+                PORTFOLIO.loc['CASH'].value -= asset.cash_change
+                # Update STOCKS df to remove unowned tickers, or update with new values
+                if asset.shares == 0: 
+                    STOCKS.drop(asset.ticker, inplace = True)
+            else:
+                print(f"{asset.ticker}: Hold at {asset.price}\n")
         else:
             print(f"{asset.ticker}: Hold at {asset.price}\n")
-    else:
-        print(f"{asset.ticker}: Hold at {asset.price}\n")
 
-    if asset.shares > 0: 
-        STOCKS.loc[asset.ticker] = asset.compiled
+        if asset.shares > 0: 
+            STOCKS.loc[asset.ticker] = asset.compiled
 
 # Update dfs
 PORTFOLIO.loc['STOCKS'].value = STOCKS.value.sum()
