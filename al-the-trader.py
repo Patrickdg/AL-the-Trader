@@ -24,7 +24,7 @@ manual = False
 # MAIN
 if manual: 
     ### temporary for manual sell trades - current bug: not selling @ rsi > 70.
-    tickers = ['PG','MRK'] # SET MANUAL TICKERS
+    tickers = ['VZ'] # SET MANUAL TICKERS
 
     for ticker in tickers: 
         asset = alg.initialize_asset(ticker, STOCKS)
