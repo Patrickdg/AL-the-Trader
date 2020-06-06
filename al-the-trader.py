@@ -19,7 +19,7 @@ imp.reload(af)
 # DECLARATIONS
 current_date = datetime.now()
 
-manual = False
+manual = True
 
 # MAIN
 if manual: 
