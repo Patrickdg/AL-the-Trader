@@ -1,2 +1,4 @@
 .vscode/settings.json
 
+objects/__pycache__/algofuncs.cpython-38.pyc
+objects/__pycache__/assetfuncs.cpython-38.pyc
