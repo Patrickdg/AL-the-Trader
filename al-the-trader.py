@@ -17,6 +17,8 @@ imp.reload(alg)
 imp.reload(af)
 
 # DECLARATIONS
+testing = False
+
 current_date = datetime.now()
 
 manual = False
