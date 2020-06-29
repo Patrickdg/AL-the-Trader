@@ -1,1 +1,8 @@
+<<<<<<< HEAD
 ALtheTrader.bat
+=======
+.vscode/settings.json
+
+objects/__pycache__/algofuncs.cpython-38.pyc
+objects/__pycache__/assetfuncs.cpython-38.pyc
+>>>>>>> a7eb44ec4a91afb5b94e1abc887844dc17303b4f

@@ -4,6 +4,10 @@
 with a simple moving average (SMA) and shortened lookback period of 10 days. 
 
 Current watchlist contains the 30 stocks in the DJIA, as of May 1, 2020. 
+
+TO-DO: 
+- Backdating (1-year?)
+- Portfolio summary adjustments (running overall return, current portfolio return, performance metrics, trade profits, # days held)
 """
 
 # LIBRARIES 
@@ -17,8 +21,9 @@ imp.reload(alg)
 imp.reload(af)
 
 # DECLARATIONS
-current_date = datetime.now()
+testing = False
 
+current_date = datetime.now()
 manual = False
 
 # MAIN
