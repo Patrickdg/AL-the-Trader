@@ -5,9 +5,6 @@ from datetime import datetime
 from collections import Counter
 import math
 
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
-
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
@@ -16,9 +13,8 @@ from objects import assetfuncs as af
 import imp
 imp.reload(af)
 
-
 # DECLARATIONS
-##SHEETS
+##EXCEL
 PORTFOLIO_FILE = pd.ExcelFile('portfolio.xlsx')
 PORTFOLIO = pd.read_excel(PORTFOLIO_FILE, sheet_name = 'portfolio', header = 0, index_col = 0)
 PORTFOLIO_HIST = pd.read_excel(PORTFOLIO_FILE, sheet_name = 'summary', header = 0, index_col = 0)

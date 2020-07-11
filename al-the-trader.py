@@ -19,11 +19,15 @@ TO-DO:
 from datetime import datetime
 from objects import assetfuncs as af
 from objects import algofuncs as alg
+from objects import updatefuncs as uf
 from objects.algofuncs import EMAIL_ADDRESS, EMAIL_PASSWORD 
 from objects.algofuncs import PORTFOLIO, PORTFOLIO_HIST, WATCHLIST, STOCKS, TRADES, CASH_ON_HAND
-import imp
-imp.reload(alg)
-imp.reload(af)
+from objects.updatefuncs import GS_WORKBOOK
+
+# import imp
+# imp.reload(alg)
+# imp.reload(af)
+# imp.reload(uf)
 
 # DECLARATIONS
 testing = False
@@ -32,7 +36,7 @@ current_date = datetime.now()
 
 # MAIN
 if manual: 
-    ### temporary for manual sell trades - current bug: not selling @ rsi > 70.
+    ### TEMPORARY for manual sell trades - current bug: not selling @ rsi > 70.
     tickers = ['VZ'] # SET MANUAL TICKERS
 
     for ticker in tickers: 
@@ -100,7 +104,17 @@ PORTFOLIO_HIST.loc[current_date.strftime("%d/%m/%Y %H:%M:%S")] = PORTFOLIO.trans
 WATCHLIST.sort_values(by = 'rsi', inplace = True)
 
 if not testing: 
+    #UPDATE: EXCEL
     alg.update_workbook(WATCHLIST, STOCKS, PORTFOLIO, TRADES, PORTFOLIO_HIST)
+    #UPDATE: GOOGLE SHEETS
+    sheet_names_list = ['watchlist','stocks','portfolio','trades','summary']
+    df_list = [WATCHLIST, STOCKS, PORTFOLIO, TRADES, PORTFOLIO_HIST]
+    try:
+        for name, df in zip(sheet_names_list, df_list): 
+            uf.update_gs_workbook(GS_WORKBOOK, name, df) 
+    except Exception as error: 
+        print(f'FAILED TO UPDATE GOOGLE SHEET: {str(error)}')
+
     # SUMMARY EMAIL
     if current_date.hour >= 16:
         trades_executed = alg.todays_trades(TRADES)
