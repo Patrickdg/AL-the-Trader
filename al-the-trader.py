@@ -6,8 +6,13 @@ with a simple moving average (SMA) and shortened lookback period of 10 days.
 Current watchlist contains the 30 stocks in the DJIA, as of May 1, 2020. 
 
 TO-DO: 
-- Backdating (1-year?)
-- Portfolio summary adjustments (running overall return, current portfolio return, performance metrics, trade profits, # days held)
+- Google sheets migration
+- Backdating (1-year? YTD2020?)
+- Portfolio summary adjustments (running overall return, 
+    current portfolio return, 
+    performance metrics, 
+    trade profits, 
+    # days held)
 """
 
 # LIBRARIES 
@@ -22,9 +27,8 @@ imp.reload(af)
 
 # DECLARATIONS
 testing = False
-
+manual = False # for manually selling/buying shares through bugs
 current_date = datetime.now()
-manual = False
 
 # MAIN
 if manual: 
@@ -95,11 +99,9 @@ PORTFOLIO_HIST.loc[current_date.strftime("%d/%m/%Y %H:%M:%S")] = PORTFOLIO.trans
 
 WATCHLIST.sort_values(by = 'rsi', inplace = True)
 
-alg.update_workbook(WATCHLIST, STOCKS, PORTFOLIO, TRADES, PORTFOLIO_HIST)
-
-# SUMMARY EMAIL
-if current_date.hour >= 16:
-    trades_executed = alg.todays_trades(TRADES)
-    alg.send_email(trades_executed, STOCKS, PORTFOLIO)
-else: 
-    pass
+if not testing: 
+    alg.update_workbook(WATCHLIST, STOCKS, PORTFOLIO, TRADES, PORTFOLIO_HIST)
+    # SUMMARY EMAIL
+    if current_date.hour >= 16:
+        trades_executed = alg.todays_trades(TRADES)
+        alg.send_email(trades_executed, STOCKS, PORTFOLIO)
