@@ -35,9 +35,11 @@ def initialize_asset(ticker, stocks_df):
     return asset
 
 def check_indicators(asset, indicators):
-    # Returns final 'buy' or 'sell' command from indicators
-    # Update dict to include any new indicators (SMA, MACD, BB, etc.)
-    # Format: 'indicator': [check_ind()]
+    '''
+    Returns final 'buy' or 'sell' command from indicators
+    Update dict to include any new indicators (SMA, MACD, BB, etc.)
+    Format: 'indicator': [check_ind()]
+    '''
     indicator_dict = {'rsi': check_rsi(asset.rsi)} 
     
     indicator_orders = {}
@@ -153,8 +155,6 @@ def send_email(trades_df, stocks_df, portfolio_df):
     </body></html>
     """
 
-    # text = text.format(table=df)
-    # html = html.format(table=df)
     message = MIMEMultipart(
         "alternative", None, [MIMEText(text), MIMEText(html,'html')])
 

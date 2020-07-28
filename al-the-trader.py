@@ -6,8 +6,7 @@ with a simple moving average (SMA) and shortened lookback period of 10 days.
 Current watchlist contains the 30 stocks in the DJIA, as of May 1, 2020. 
 
 TO-DO: 
-- Google sheets migration
-- Backdating (1-year? YTD2020?)
+- Backdating
 - Portfolio summary adjustments (running overall return, 
     current portfolio return, 
     performance metrics, 
@@ -23,11 +22,6 @@ from objects import updatefuncs as uf
 from objects.algofuncs import EMAIL_ADDRESS, EMAIL_PASSWORD 
 from objects.algofuncs import PORTFOLIO, PORTFOLIO_HIST, WATCHLIST, STOCKS, TRADES, CASH_ON_HAND
 from objects.updatefuncs import GS_WORKBOOK
-
-# import imp
-# imp.reload(alg)
-# imp.reload(af)
-# imp.reload(uf)
 
 # DECLARATIONS
 testing = False
