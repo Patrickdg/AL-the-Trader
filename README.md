@@ -24,8 +24,7 @@ Scraping is performed using *yfinance* module and *pandas* to wrangle data into 
     - 50-200SMA  
     - Bollinger bands  
     - MACD  
-- Portfolio tracking & Dashboard updates: daily/weekly/monthly performance measures  
-- Dynamic algorithms
+- Dynamic algorithms (ML) 
 
 ## Future Implementations 
 - Dynamic watchlist (based on trending indicators + other screens)
