@@ -30,29 +30,25 @@ def calc_rsi(df, period = ''):
 
 ##TREND INDICATORS 
 ###MACD
-def calc_macd(data, params):
-    period_fast = params['a'][0]
-    period_slow = params['a'][1]
-    signal = params['b']
+def calc_macd(data, params = [12, 26, 9]):
+    data = pd.Series(data)
+    period_fast = params[0]
+    period_slow = params[1]
+    signal = params[2]
 
-    fast_ema = data.ewm(span = period_fast, min_periods = period_fast, 
+    fast_ema = data.ewm(span = period_fast, 
+                        min_periods = period_fast, 
                         adjust = False).mean()
-    slow_ema = data.ewm(span = period_slow, min_periods = period_fast, 
+    slow_ema = data.ewm(span = period_slow, 
+                        min_periods = period_slow, 
                         adjust = False).mean()
     macd = fast_ema - slow_ema
 
     signal_line = macd.ewm(span = signal, adjust = False).mean()
     hist = macd - signal_line
     hist = hist.rename('macd_hist')
-    
-    macd_df = pd.DataFrame({'hist': hist, 
-                            'prev': hist.shift(1)})
-    
-    macd_df['hist_bs'] = np.where(((macd_df['hist'] > 0) & (macd_df.prev < 0)), 'buy', 
-                             np.where(((macd_df['hist'] < 0) & (macd_df.prev > 0)), 'sell', 
-                                'hold'))
 
-    return macd_df['hist_bs']
+    return hist, hist.shift(1) 
 
 ##VOLATILITY INDICATORS
 ###BOLLINGER BANDS
@@ -78,6 +74,3 @@ def calc_bb(data, params):
 
 def add_indicators(df, cols, periods, inds): 
     pass
-
-# x = assets.Close.rolling(14).apply(calc_rsi)
-assets.Close.rolling(15).apply(calc_rsi)
