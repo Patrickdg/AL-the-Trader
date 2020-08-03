@@ -31,7 +31,7 @@ for ticker in watchlist.ticker:
     # Initialize asset history
     asset = yf.Ticker(ticker)
     asset_figs = asset.history(period = period)
-    # Add Rolling columns
+    # Add Rolling columns + indicators
     asset_figs = ra.add_rolling_cols(asset_figs, cols, periods, funcs).drop(drop_cols, axis = 1)
 
     # JOIN: Benchmark info
@@ -49,8 +49,8 @@ for ticker in watchlist.ticker:
 
     assets = pd.concat([assets, asset_figs]); print(assets.shape)
     print(ticker)
-    if ticker == 'WMT': 
-        break
+    # if ticker == 'WMT': 
+    break
 # Drop all Nan columns, Reorder columns
 assets.dropna(how = 'all', axis = 1, inplace = True); assets.dropna(how = 'any', axis = 0, inplace = True)
 assets.reset_index(inplace = True)
@@ -58,4 +58,4 @@ assets.reset_index(inplace = True)
 first_cols = ['Date','sector']; rem_cols = [col for col in assets.columns if col not in first_cols]
 assets = assets[first_cols+rem_cols]
 
-assets.to_excel('ml/consolidated_asset_stock.xlsx')
+# assets.to_excel('ml/consolidated_asset_stock.xlsx')
