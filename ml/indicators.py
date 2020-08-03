@@ -48,7 +48,7 @@ def calc_macd(data, params = [12, 26, 9]):
     hist = macd - signal_line
     hist = hist.rename('macd_hist')
 
-    return hist, hist.shift(1) 
+    return hist
 
 ##VOLATILITY INDICATORS
 ###BOLLINGER BANDS
@@ -68,6 +68,3 @@ def calc_bb(data, params = [2, 50]):
     df['bb_lower_diff'] =  df['price'] - df['bb_lower_band']
 
     return df['bb_upper_band'], df['bb_upper_diff'], df['bb_lower_band'], df['bb_lower_diff']
-
-def add_indicators(df, cols, periods, inds): 
-    pass
