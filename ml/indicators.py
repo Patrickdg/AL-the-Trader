@@ -52,25 +52,22 @@ def calc_macd(data, params = [12, 26, 9]):
 
 ##VOLATILITY INDICATORS
 ###BOLLINGER BANDS
-def calc_bb(data, params): 
-    data = data.sort_index()
-    deviations = params['a']
-    trend_period = params['b']
+def calc_bb(data, params = [2, 50]): 
+    deviations = params[0]
+    trend_period = params[1]
     
     df = pd.DataFrame(data.rename('price'))
 
     df['trend'] = data.rolling(window = trend_period).mean()
     df['std'] = df['price'].rolling(window = trend_period).std()
     margin = df['std'] * deviations
-    df['upper_band'] = df['trend'] + margin
-    df['lower_band'] = df['trend'] - margin
 
-    # Buy/sell indicator: 
-    df['bb_bs'] = np.where(df['price'] <= df['lower_band'], 'buy', 
-                    np.where(df['price'] >= df['upper_band'], 'sell',
-                        'hold'))
+    df['bb_upper_band'] = df['trend'] + margin
+    df['bb_upper_diff'] =  df['price'] - df['bb_upper_band']
+    df['bb_lower_band'] = df['trend'] - margin
+    df['bb_lower_diff'] =  df['price'] - df['bb_lower_band']
 
-    return df['bb_bs']
+    return df['bb_upper_band'], df['bb_upper_diff'], df['bb_lower_band'], df['bb_lower_diff']
 
 def add_indicators(df, cols, periods, inds): 
     pass
