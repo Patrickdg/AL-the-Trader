@@ -15,10 +15,10 @@ imp.reload(ind)
 
 #DECLARATIONS/PARAMS
 watchlist = pd.read_excel('ml/watchlist_ml.xlsx', sheet_name = 'watchlist')
-period = '5y' # for individual stock history
+period = '3y' # for individual stock history
 cols = ['Open','High','Low','Close','Volume', 'rsi', 'macd_hist', 'bb_upper_band', 'bb_upper_diff', 'bb_lower_band', 'bb_lower_diff']
 drop_cols = ['Dividends', 'Stock Splits']
-periods = [5, 10, 15, 21, 130] # for rolling aggregate calcs
+periods = [5, 10, 21, 130] # for rolling aggregate calcs
 funcs = [ra.rolling_mean, ra.rolling_max, ra.rolling_min, ra.rolling_stdev, ra.z_score]
 benchmark_ticker = 'VTSMX' # The Vanguard Total Stock Market Index 
 
@@ -68,4 +68,5 @@ for ticker in watchlist.ticker:
     first_cols = ['Date','sector']; rem_cols = [col for col in asset_figs.columns if col not in first_cols]
     asset_figs = asset_figs[first_cols+rem_cols]
     
-    asset_figs.to_excel(f'ml/stock_data/{ticker}.xlsx')
+    # asset_figs.to_excel(f'ml/stock_data/{ticker}.xlsx')
+    asset_figs.loc[:, ['Date', 'Close']].to_excel(f'ml/stock_data/buy_sell_labels/{ticker}.xlsx')
