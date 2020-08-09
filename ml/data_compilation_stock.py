@@ -2,9 +2,8 @@
 import pandas as pd
 import numpy as np
 import yfinance as yf
-import rolling_agg_funcs as ra
-import indicators as ind
-import swifter
+import ml.rolling_agg_funcs as ra
+import ml.indicators as ind
 
 import imp
 imp.reload(ra)
@@ -13,7 +12,8 @@ imp.reload(ind)
 #DECLARATIONS/PARAMS
 watchlist = pd.read_excel('ml/watchlist_ml.xlsx', sheet_name = 'watchlist')
 period = '3y' # for individual stock history
-cols = ['Open','High','Low','Close','Volume', 'rsi', 'macd_hist', 'bb_upper_band', 'bb_upper_diff', 'bb_lower_band', 'bb_lower_diff']
+cols = ['Open','High','Low','Close', 'Volume', 'rsi', 'macd_hist', 
+        'bb_upper_band', 'bb_upper_diff', 'bb_lower_band', 'bb_lower_diff']
 drop_cols = ['Dividends', 'Stock Splits']
 periods = [5, 10, 21, 65] # for rolling aggregate calcs
 funcs = [ra.rolling_mean, ra.rolling_max, ra.rolling_min, ra.rolling_stdev, ra.z_score]
@@ -33,6 +33,7 @@ benchmark_history['macd_hist'] = ind.calc_macd(benchmark_history['Close'])
 benchmark_history['bb_upper_band'], benchmark_history['bb_upper_diff'], benchmark_history['bb_lower_band'], benchmark_history['bb_lower_diff'] = ind.calc_bb(benchmark_history['Close'])
 ##Rolling Aggregates 
 benchmark_history = ra.add_rolling_cols(benchmark_history, cols, periods, funcs).drop(drop_cols, axis = 1)
+benchmark_history['next_close'] = benchmark_history['Close'].shift(-1)
 ##Denote market benchmark column names
 benchmark_history.columns = [f'market_{col}' for col in benchmark_history.columns]
 
@@ -68,6 +69,7 @@ for ticker in watchlist.ticker:
                             deltas], 
                             axis = 1)
     asset_figs['sector'] = asset.info['sector']
+    asset_figs['next_close'] = asset_figs['Close'].shift(-1)
     
     print(ticker); print(asset_figs.shape)
     
@@ -76,8 +78,13 @@ for ticker in watchlist.ticker:
     asset_figs.dropna(how = 'any', axis = 0, inplace = True)
     asset_figs.reset_index(inplace = True)
 
-    first_cols = ['Date','sector']; rem_cols = [col for col in asset_figs.columns if col not in first_cols]
+    first_cols = ['Date','sector', 'next_close']; rem_cols = [col for col in asset_figs.columns if col not in first_cols]
     asset_figs = asset_figs[first_cols+rem_cols]
+
+    # asset_figs.to_excel(f'ml/stock_data/stock_features/{ticker}.xlsx')
+    asset_figs.to_csv(f'ml/stock_data/stock_features/{ticker}.csv')
     
-    # asset_figs.to_excel(f'ml/stock_data/{ticker}.xlsx')
-    asset_figs.loc[:, ['Date', 'Close']].to_excel(f'ml/stock_data/buy_sell_labels/{ticker}.xlsx')
+    ##Full Training Data
+    
+    ##Labelling Data: Stock Close
+    # asset_figs.loc[:, ['Date', 'Close']].to_excel(f'ml/stock_data/buy_sell_labels/{ticker}.xlsx')

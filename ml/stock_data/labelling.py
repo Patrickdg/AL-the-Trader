@@ -1,3 +1,6 @@
+'''
+https://www.researchgate.net/figure/Labelling-Points-with-Window_fig1_316848946
+'''
 import pandas as pd
 
 def majority_buy_sell(close_prices, periods = [5, 10, 20]):
