@@ -1,13 +1,10 @@
-'''
-For each stock in watchlist, gather stock price + volume data + rolling aggregates
-'''
-
 #LIBRARIES
 import pandas as pd
 import numpy as np
 import yfinance as yf
-import ml.rolling_agg_funcs as ra
-import ml.indicators as ind
+import rolling_agg_funcs as ra
+import indicators as ind
+import swifter
 
 import imp
 imp.reload(ra)
@@ -18,21 +15,35 @@ watchlist = pd.read_excel('ml/watchlist_ml.xlsx', sheet_name = 'watchlist')
 period = '3y' # for individual stock history
 cols = ['Open','High','Low','Close','Volume', 'rsi', 'macd_hist', 'bb_upper_band', 'bb_upper_diff', 'bb_lower_band', 'bb_lower_diff']
 drop_cols = ['Dividends', 'Stock Splits']
-periods = [5, 10, 21, 130] # for rolling aggregate calcs
+periods = [5, 10, 21, 65] # for rolling aggregate calcs
 funcs = [ra.rolling_mean, ra.rolling_max, ra.rolling_min, ra.rolling_stdev, ra.z_score]
 benchmark_ticker = 'VTSMX' # The Vanguard Total Stock Market Index 
 
-#SET BENCHMARK INDEX, add indicators + rolling aggregates
+'''
+BENCHMARK INDEX
+- Set benchmark using ticker benchmark_ticker from above: gather history
+- Calculate applicable indicators 
+- Add rolling cols (means, mins, maxes, z_scores)
+- change column names to denote vs. stock column names
+'''
+##Indicators
 benchmark_history = yf.Ticker(benchmark_ticker).history(period = period)
-
-benchmark_history['rsi'] = benchmark_history['Close'].rolling(15).apply(ind.calc_rsi) #RSI
-benchmark_history['macd_hist'] = ind.calc_macd(benchmark_history['Close']) #MACD
-benchmark_history['bb_upper_band'], benchmark_history['bb_upper_diff'], benchmark_history['bb_lower_band'], benchmark_history['bb_lower_diff'] = ind.calc_bb(benchmark_history['Close'])# BBs
+benchmark_history['rsi'] = benchmark_history['Close'].rolling(15).apply(ind.calc_rsi) 
+benchmark_history['macd_hist'] = ind.calc_macd(benchmark_history['Close']) 
+benchmark_history['bb_upper_band'], benchmark_history['bb_upper_diff'], benchmark_history['bb_lower_band'], benchmark_history['bb_lower_diff'] = ind.calc_bb(benchmark_history['Close'])
+##Rolling Aggregates 
 benchmark_history = ra.add_rolling_cols(benchmark_history, cols, periods, funcs).drop(drop_cols, axis = 1)
-
+##Denote market benchmark column names
 benchmark_history.columns = [f'market_{col}' for col in benchmark_history.columns]
 
-# MAIN LOOP
+'''
+MAIN LOOP
+- for each stock in watchlist, initialize asset 
+- then add indicators and rolling col aggregates
+- JOIN: Benchmark history info based on Date
+- Calculate growth % deltas for all figures; column concatenate with original figures in 'cols' list
+- Drop all null columns and any null rows, rearrange columns 
+'''
 for ticker in watchlist.ticker: 
     # Initialize asset history
     asset = yf.Ticker(ticker)
