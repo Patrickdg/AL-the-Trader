@@ -2,8 +2,9 @@
 import pandas as pd
 import numpy as np
 import yfinance as yf
-import ml.rolling_agg_funcs as ra
-import ml.indicators as ind
+import rolling_agg_funcs as ra
+import indicators as ind
+import os
 
 import imp
 imp.reload(ra)
@@ -11,7 +12,7 @@ imp.reload(ind)
 
 #DECLARATIONS/PARAMS
 watchlist = pd.read_excel('ml/watchlist_ml.xlsx', sheet_name = 'watchlist')
-period = '3y' # for individual stock history
+period = '4y' # for individual stock history
 cols = ['Open','High','Low','Close', 'Volume', 'rsi', 'macd_hist', 
         'bb_upper_band', 'bb_upper_diff', 'bb_lower_band', 'bb_lower_diff']
 drop_cols = ['Dividends', 'Stock Splits']
@@ -46,6 +47,11 @@ MAIN LOOP
 - Drop all null columns and any null rows, rearrange columns 
 '''
 for ticker in watchlist.ticker: 
+    file_path = f'ml/stock_data/stock_features/{ticker}.csv'    
+    if f'{ticker}.csv' in os.listdir('ml/stock_data/stock_features'):
+        print(f"Pass on {ticker}")
+        continue
+
     # Initialize asset history
     asset = yf.Ticker(ticker)
     asset_figs = asset.history(period = period)
@@ -68,7 +74,10 @@ for ticker in watchlist.ticker:
                             asset_figs.iloc[:, ['z_score' in col for col in asset_figs.columns]],
                             deltas], 
                             axis = 1)
-    asset_figs['sector'] = asset.info['sector']
+    try: 
+        asset_figs['sector'] = asset.info['sector']
+    except: 
+        asset_figs['sector'] = 'No Sector'
     asset_figs['next_close'] = asset_figs['Close'].shift(-1)
     
     print(ticker); print(asset_figs.shape)
@@ -81,10 +90,7 @@ for ticker in watchlist.ticker:
     first_cols = ['Date','sector', 'next_close']; rem_cols = [col for col in asset_figs.columns if col not in first_cols]
     asset_figs = asset_figs[first_cols+rem_cols]
 
-    # asset_figs.to_excel(f'ml/stock_data/stock_features/{ticker}.xlsx')
-    asset_figs.to_csv(f'ml/stock_data/stock_features/{ticker}.csv')
-    
-    ##Full Training Data
-    
+    asset_figs.to_csv(file_path)
+
     ##Labelling Data: Stock Close
     # asset_figs.loc[:, ['Date', 'Close']].to_excel(f'ml/stock_data/buy_sell_labels/{ticker}.xlsx')
