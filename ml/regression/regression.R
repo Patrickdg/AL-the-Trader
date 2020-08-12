@@ -1,4 +1,3 @@
-
 # Libraries ---------------------------------------------------------------
 library(data.table)
 library(forecast)
@@ -23,14 +22,22 @@ train_y <- train['next_close']; train <- train[setdiff(names(train), remove_cols
 test <- df[-train_ind,]
 test_y <- test['next_close']; test <- test[setdiff(names(test), remove_cols)]
 
-##Remove near zero variance features
+##Remove near zero variance features and only include non-NA variance cols
 nearzeros <- nearZeroVar(train)
+save(nearzeros, file = 'ml/regression/lm_objects/excl_nearzerovar_cols.rda')
 train <- train[,-nearzeros]
 test <- test[,-nearzeros]
+
+vars <- sapply(train, var); var_cols <- names(na.omit(vars))
+save(var_cols, file = 'ml/regression/lm_objects/incl_var_cols.rda')
+train <- train[,var_cols]
+test <- test[,var_cols]
 
 ##PRINCIPAL COMPONENT ANALYSIS
 set.seed(1111)
 preProc <- preProcess(train, method = "pca", thresh = 0.9)
+save(preProc, file = "ml/regression/lm_objects/pca_preproc.rda")
+
 trainPC <- predict(preProc, train)
 testPC <- predict(preProc, test)
 
@@ -42,19 +49,23 @@ pvals <- summary(fitall)$coefficients[,4]
 # extract coefficients 
 coefs <- summary(fitall)$coefficients[,1] 
 
+# extract top features, p-val <= 0.05
 top <- data.frame(cbind(coefs, pvals)) 
 top <- top[order(top[,2], decreasing = FALSE),]
-top <- top[top$pvals <= 0.05, ]; top # select features <= 0.05 pval
-features <- c(rownames(top))
+top <- top[top$pvals <= 0.05, ]; top
+features <- c(rownames(top)); features <- features[-1] # remove 'intercept', 1st feature
+save(features, file = "ml/regression/lm_objects/top_features.rda")
 
-train <- cbind(trainPC, train_y)
+train <- trainPC[features]; test <- testPC[features]
+train <- cbind(train, train_y); test <- cbind(test)
 train <- train[!is.infinite(rowSums(train)),]
 
 model <- lm(next_close ~ ., data = train)
+save(model, file = "ml/regression/lm_objects/regression_model.rda")
 
 # Predictions -------------------------------------------------------------
-predictions <- predict(model, newdata = testPC)
-# confusionMatrix(predictions, test['next_close'])
+predictions <- predict(model, newdata = test)
+# confusionMatrix(predictions, test_y)
 
-predicted = cbind(testPC, test_y, predictions)
-write.csv(predicted,'predicted.csv')
+predicted = cbind(test, test_y, predictions)
+write.csv(predicted,'ml/regression/training_predictions.csv')
