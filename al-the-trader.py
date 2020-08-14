@@ -31,7 +31,7 @@ current_date = datetime.now()
 # MAIN
 if manual: 
     ### TEMPORARY for manual sell trades - current bug: not selling @ rsi > 70.
-    tickers = ['VZ'] # SET MANUAL TICKERS
+    tickers = ['RTX'] # SET MANUAL TICKERS
 
     for ticker in tickers: 
         asset = alg.initialize_asset(ticker, STOCKS)

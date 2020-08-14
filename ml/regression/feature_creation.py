@@ -2,23 +2,27 @@
 import pandas as pd
 import numpy as np
 import yfinance as yf
+from datetime import datetime
 import ml.rolling_agg_funcs as ra
 import ml.indicators as ind
 import os
+from objects.algofuncs import WATCHLIST
 
 import imp
 imp.reload(ra)
 imp.reload(ind)
 
 #DECLARATIONS/PARAMS
-watchlist = pd.read_excel('ml/watchlist_ml.xlsx', sheet_name = 'watchlist')
 periods = [5, 10, 21, 65] # for rolling aggregate calcs
-period = f'{max(periods)}d' # for individual stock history
+period = f'{max(periods)*2+1}d' # for individual stock history
 cols = ['Open','High','Low','Close', 'Volume', 'rsi', 'macd_hist', 
         'bb_upper_band', 'bb_upper_diff', 'bb_lower_band', 'bb_lower_diff']
 drop_cols = ['Dividends', 'Stock Splits']
+features_to_keep = pd.read_csv('ml/stock_data/features.csv', header = None)
 funcs = [ra.rolling_mean, ra.rolling_max, ra.rolling_min, ra.rolling_stdev, ra.z_score]
 benchmark_ticker = 'VTSMX' # The Vanguard Total Stock Market Index 
+
+current_date = datetime.now()
 
 '''
 BENCHMARK INDEX
@@ -46,12 +50,8 @@ MAIN LOOP
 - Calculate growth % deltas for all figures; column concatenate with original figures in 'cols' list
 - Drop all null columns and any null rows, rearrange columns 
 '''
-for ticker in watchlist.ticker: 
-    file_path = f'ml/stock_data/stock_features/{ticker}.csv'    
-    if f'{ticker}.csv' in os.listdir('ml/stock_data/stock_features'):
-        print(f"Pass on {ticker}")
-        continue
-
+features = pd.DataFrame()
+for ticker in WATCHLIST.index: 
     # Initialize asset history
     asset = yf.Ticker(ticker)
     asset_figs = asset.history(period = period)
@@ -79,18 +79,19 @@ for ticker in watchlist.ticker:
     except: 
         asset_figs['sector'] = 'No Sector'
     asset_figs['next_close'] = asset_figs['Close'].shift(-1)
-    
-    print(ticker); print(asset_figs.shape)
+    asset_figs['Ticker'] = ticker
     
     # Drop all-Nan columns, Reorder columns
-    asset_figs.dropna(how = 'all', axis = 1, inplace = True)
-    asset_figs.dropna(how = 'any', axis = 0, inplace = True)
     asset_figs.reset_index(inplace = True)
+    asset_figs = asset_figs.loc[:, features_to_keep[0]]
+    asset_figs.drop(list(asset_figs.filter(regex = 'next')), axis = 1, inplace = True)
 
-    first_cols = ['Date','sector', 'next_close']; rem_cols = [col for col in asset_figs.columns if col not in first_cols]
-    asset_figs = asset_figs[first_cols+rem_cols]
 
-    asset_figs.to_csv(file_path)
+    features = features.append(asset_figs.iloc[-1,:])
+    print(ticker); print(features.shape)
+    print(features)
 
-    ##Labelling Data: Stock Close
-    # asset_figs.loc[:, ['Date', 'Close']].to_excel(f'ml/stock_data/buy_sell_labels/{ticker}.xlsx')
+first_cols = ['Ticker', 'Date','sector']; rem_cols = [col for col in features.columns if col not in first_cols]
+features = features[first_cols+rem_cols]
+features.reset_index(drop = True, inplace = True)
+features.to_csv(f'ml/regression/input_features-{current_date.strftime("%d-%m-%Y")}.csv')
