@@ -27,7 +27,6 @@ CASH_ON_HAND = PORTFOLIO.loc['CASH'].value
 EMAIL_ADDRESS = os.environ.get('AL_EMAIL')
 EMAIL_PASSWORD = os.environ.get('AL_PASS')
 
-
 # FUNCTIONS
 def initialize_asset(ticker, stocks_df):
     asset = af.Asset(ticker)
