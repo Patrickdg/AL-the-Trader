@@ -1,7 +1,6 @@
 Ticker
 Date
 sector
-next_close
 Open
 High
 Low
@@ -538,4 +537,8 @@ market_bb_lower_diff_rolling_max_65_delta
 market_bb_lower_diff_rolling_min_65_delta
 market_bb_lower_diff_rolling_stdev_65_delta
 market_bb_lower_diff_z_score_65_delta
-market_next_close_delta
+next_close
+next_close_2
+next_close_3
+next_close_5
+next_close_10

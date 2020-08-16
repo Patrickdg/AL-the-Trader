@@ -72,7 +72,6 @@ for ticker in WATCHLIST.index:
     # Calculate growth rates, concat with original figs and ticker info
     deltas = asset_figs.diff()/asset_figs.shift(1)
     deltas.columns = [f'{col}_delta' for col in deltas.columns]
-
     asset_figs = pd.concat([asset_figs[cols],
                             asset_figs.iloc[:, ['z_score' in col for col in asset_figs.columns]],
                             deltas], 
@@ -81,17 +80,20 @@ for ticker in WATCHLIST.index:
         asset_figs['sector'] = asset.info['sector']
     except: 
         asset_figs['sector'] = 'No Sector'
-    asset_figs['next_close'] = asset_figs['Close'].shift(-1)
-    asset_figs['Ticker'] = ticker
 
+    asset_figs['next_close'] = asset_figs['Close'].shift(-1)
+    asset_figs['next_close_2'] = asset_figs['Close'].shift(-2)
+    asset_figs['next_close_3'] = asset_figs['Close'].shift(-3)
+    asset_figs['next_close_5'] = asset_figs['Close'].shift(-5)
+    asset_figs['next_close_10'] = asset_figs['Close'].shift(-10)
+    asset_figs['Ticker'] = ticker
     
     # Drop all-Nan columns, save only needed columns while removing any hindsight 'next' cols
     asset_figs.dropna(how = 'all', axis = 1, inplace = True)
     asset_figs.dropna(how = 'any', axis = 0, inplace = True)
 
-    asset_figs.loc[:,'next_close'].to_csv(f'ml/regression/lm_objects/training/labels/training_labels_{ticker}.csv')
+    asset_figs.loc[:,['Ticker', 'next_close', 'next_close_2', 'next_close_3', 'next_close_5', 'next_close_10']].to_csv(f'ml/regression/lm_objects/training/labels/{ticker}.csv')
     asset_figs = asset_figs.loc[:, features_to_keep[0]]
-    asset_figs.drop(list(asset_figs.filter(regex = 'next')), axis = 1, inplace = True)
     asset_figs.drop('Date', axis = 1, inplace = True)
     asset_figs.reset_index(inplace = True)
 
@@ -101,7 +103,3 @@ for ticker in WATCHLIST.index:
 
     print(ticker); print(asset_figs.shape)
     asset_figs.to_csv(file_path)
-    
-    n +=1 
-    # if n > 5:
-    #     break 

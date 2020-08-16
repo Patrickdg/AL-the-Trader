@@ -87,7 +87,6 @@ for ticker in WATCHLIST.index:
     asset_figs = asset_figs.loc[:, features_to_keep[0]]
     asset_figs.drop(list(asset_figs.filter(regex = 'next')), axis = 1, inplace = True)
 
-
     features = features.append(asset_figs.iloc[-1,:])
     print(ticker); print(features.shape)
     print(features)

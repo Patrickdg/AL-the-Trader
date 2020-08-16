@@ -6,7 +6,7 @@ library(caret)
 library(readr)
 
 # Data Setup --------------------------------------------------------------
-df <- list.files(path='ml/stock_data/stock_features', full.names = TRUE) %>% 
+df <- list.files(path='ml/regression/lm_objects/training/feature_data', full.names = TRUE) %>% 
   lapply(read_csv) %>% 
   bind_rows %>%
   data.frame

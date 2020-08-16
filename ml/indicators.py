@@ -24,7 +24,7 @@ def calc_rsi(df, period = ''):
         #RSI
         rsi = 100 - (100/(1+rs))
     except ZeroDivisionError as err:
-        print(str(error))
+        print(str(err))
         rsi = 100
     return rsi
 
