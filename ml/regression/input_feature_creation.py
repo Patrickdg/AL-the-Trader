@@ -75,23 +75,21 @@ for ticker in WATCHLIST.index:
                             asset_figs.iloc[:, ['z_score' in col for col in asset_figs.columns]],
                             deltas], 
                             axis = 1)
+    # Set sector + Ticker cols
     try: 
         asset_figs['sector'] = asset.info['sector']
     except: 
         asset_figs['sector'] = 'No Sector'
-    asset_figs['next_close'] = asset_figs['Close'].shift(-1)
     asset_figs['Ticker'] = ticker
     
     # Drop all-Nan columns, Reorder columns
     asset_figs.reset_index(inplace = True)
     asset_figs = asset_figs.loc[:, features_to_keep[0]]
-    asset_figs.drop(list(asset_figs.filter(regex = 'next')), axis = 1, inplace = True)
 
     features = features.append(asset_figs.iloc[-1,:])
     print(ticker); print(features.shape)
-    print(features)
 
-first_cols = ['Ticker', 'Date','sector']; rem_cols = [col for col in features.columns if col not in first_cols]
+first_cols = ['Date','sector', 'Ticker']; rem_cols = [col for col in features.columns if col not in first_cols]
 features = features[first_cols+rem_cols]
 features.reset_index(drop = True, inplace = True)
-features.to_csv(f'ml/regression/input_features-{current_date.strftime("%d-%m-%Y")}.csv')
+features.to_csv(f'ml/regression/lm_inputs/input_features_{current_date.strftime("%m-%d-%Y")}.csv')

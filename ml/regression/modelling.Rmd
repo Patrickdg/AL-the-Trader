@@ -38,9 +38,9 @@ test_y <- test[y_col]; test <- test[setdiff(names(test), remove_cols)]
 
 ```{r preprocessing}
 ##Remove near zero variance features and only include non-NA variance cols
-nearzeros <- nearZeroVar(train)
-train <- train[,-nearzeros]
-test <- test[,-nearzeros]
+nearzeros <- nearZeroVar(train); nearzeros <- names(train)[nearzeros]
+train <- train[setdiff(names(train), nearzeros)]
+test <- test[setdiff(names(test), nearzeros)]
 
 vars <- sapply(train, var); var_cols <- names(na.omit(vars))
 train <- train[,var_cols]
@@ -48,6 +48,8 @@ test <- test[,var_cols]
 
 ##PRINCIPAL COMPONENT ANALYSIS
 set.seed(1111)
+train <- train[, -which(names(train) == "next_close")]
+test <- test[, -which(names(test) == "next_close")]
 preProc <- preProcess(train, method = "pca", thresh = 0.9)
 
 trainPC <- predict(preProc, train)

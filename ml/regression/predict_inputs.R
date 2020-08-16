@@ -5,39 +5,38 @@ library(dplyr)
 library(caret)
 library(readr)
 
-# Data Setup --------------------------------------------------------------
-# df <- list.files(path='ml/stock_data/stock_features', full.names = TRUE) %>% 
-#   lapply(read_csv) %>% 
-#   bind_rows %>%
-#   data.frame
-# names(df)[1] <- 'Index'
-
-# Remove unneeded columns
-remove_cols <- c('Date','Index','sector','market_next_close_delta', 'next_close')
-train <- train[setdiff(names(train), remove_cols)]
-
-# Remove near zero variance features and only include non-NA variance cols
+# Load Variables ----------------------------------------------------------
 load(file = 'ml/regression/lm_objects/excl_nearzerovar_cols.rda')
-train <- train[,-nearzeros]
-
 load(file = 'ml/regression/lm_objects/incl_var_cols.rda')
+load(file = "ml/regression/lm_objects/pca_preproc.rda")
+load(file = "ml/regression/lm_objects/top_features.rda")
+load(file = "ml/regression/lm_objects/regression_model.rda")
+
+# Data Setup --------------------------------------------------------------
+date <- format(Sys.Date(), '%m-%d-%Y')
+remove_cols <- c('Date','Index','sector', 'Ticker', 'next_close', 'next_close_2', 'next_close_3','next_close_5','next_close_10')
+df <- read_csv(sprintf('ml/regression/lm_inputs/input_features_%s.csv', date))
+## Convert all number columns to numeric
+tickers <- df$Ticker
+df[setdiff(names(df), remove_cols)] <- df[setdiff(names(df), remove_cols)] %>% mutate_all(as.numeric)
+train <- df[setdiff(names(df), remove_cols)]
+
+
+# Processing --------------------------------------------------------------
+# Remove near zero variance features and only include non-NA variance cols
+train <- train[setdiff(names(train), nearzeros)]
+var_cols <- var_cols[1:(length(var_cols)-1)]
 train <- train[,var_cols]
 
 ##PRINCIPAL COMPONENT ANALYSIS
-set.seed(1111)
-load(file = "ml/regression/lm_objects/pca_preproc.rda")
 trainPC <- predict(preProc, train)
 
 ##MODELLING, FEATURE SELECTION
-load(file = "ml/regression/lm_objects/top_features.rda")
-
 train <- trainPC[features]
 train <- train[!is.infinite(rowSums(train)),] # remove inf values 
 
-load(file = "ml/regression/lm_objects/regression_model.rda")
-
 # Predictions -------------------------------------------------------------
 prediction <- predict(model, newdata = train)
+prediction <- cbind(tickers, train, prediction)
 
-prediction <- cbind(train, prediction)
-write.csv(prediction,'ml/regression/predicted.csv')
+write.csv(prediction,sprintf('ml/regression/lm_inputs/predictions/predicted_%s.csv', date))
