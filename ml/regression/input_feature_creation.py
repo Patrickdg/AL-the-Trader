@@ -19,7 +19,7 @@ period = f'{max(periods)*2+1}d' # for individual stock history
 cols = ['Open','High','Low','Close', 'Volume', 'rsi', 'macd_hist', 
         'bb_upper_band', 'bb_upper_diff', 'bb_lower_band', 'bb_lower_diff']
 drop_cols = ['Dividends', 'Stock Splits']
-features_to_keep = pd.read_csv('ml/stock_data/features.csv', header = None)
+features_to_keep = pd.read_csv('ml/regression/lm_inputs/features.csv', header = None)
 funcs = [ra.rolling_mean, ra.rolling_max, ra.rolling_min, ra.rolling_stdev, ra.z_score]
 benchmark_ticker = 'VTSMX' # The Vanguard Total Stock Market Index 
 
