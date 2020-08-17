@@ -1,3 +1,4 @@
+# ! /usr/bin/Rscript
 # Libraries ---------------------------------------------------------------
 library(data.table)
 library(forecast)
@@ -15,12 +16,11 @@ load(file = "ml/regression/lm_objects/regression_model.rda")
 # Data Setup --------------------------------------------------------------
 date <- format(Sys.Date(), '%m-%d-%Y')
 remove_cols <- c('Date','Index','sector', 'Ticker', 'next_close', 'next_close_2', 'next_close_3','next_close_5','next_close_10')
-df <- read_csv(sprintf('ml/regression/lm_inputs/input_features_%s.csv', date))
+df <- read_csv(sprintf('ml/regression/lm_inputs/inputs/input_features_%s.csv', date))
 ## Convert all number columns to numeric
 tickers <- df$Ticker
 df[setdiff(names(df), remove_cols)] <- df[setdiff(names(df), remove_cols)] %>% mutate_all(as.numeric)
 train <- df[setdiff(names(df), remove_cols)]
-
 
 # Processing --------------------------------------------------------------
 # Remove near zero variance features and only include non-NA variance cols

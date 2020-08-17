@@ -92,4 +92,4 @@ for ticker in WATCHLIST.index:
 first_cols = ['Date','sector', 'Ticker']; rem_cols = [col for col in features.columns if col not in first_cols]
 features = features[first_cols+rem_cols]
 features.reset_index(drop = True, inplace = True)
-features.to_csv(f'ml/regression/lm_inputs/input_features_{current_date.strftime("%m-%d-%Y")}.csv')
+features.to_csv(f'ml/regression/lm_inputs/inputs/input_features_{current_date.strftime("%m-%d-%Y")}.csv')
