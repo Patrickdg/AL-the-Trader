@@ -13,3 +13,6 @@ Al-the-Trader.Rproj
 objects/__pycache__/algofuncs.cpython-37.pyc
 ml/regression/__pycache__/input_feature_creation.cpython-37.pyc
 ALpredictR.bat
+ml/objects/__pycache__/algofuncs.cpython-37.pyc
+ml/objects/__pycache__/assetfuncs.cpython-37.pyc
+ml/objects/__pycache__/updatefuncs.cpython-37.pyc

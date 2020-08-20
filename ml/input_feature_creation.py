@@ -2,12 +2,12 @@
 import pandas as pd
 import numpy as np
 import yfinance as yf
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 
 from objects.algofuncs import WATCHLIST
-import ml.rolling_agg_funcs as ra
-import ml.indicators as ind
+import rolling_agg_funcs as ra
+import indicators as ind
 
 import imp
 imp.reload(ra)
@@ -23,7 +23,8 @@ features_to_keep = pd.read_csv('ml/regression/lm_inputs/features.csv', header = 
 funcs = [ra.rolling_mean, ra.rolling_max, ra.rolling_min, ra.rolling_stdev, ra.z_score]
 benchmark_ticker = 'VTSMX' # The Vanguard Total Stock Market Index 
 
-current_date = datetime.now()
+delta = 1 
+current_date = datetime.now() - timedelta(days = delta)
 
 '''
 BENCHMARK INDEX
@@ -86,7 +87,7 @@ for ticker in WATCHLIST.index:
     asset_figs.reset_index(inplace = True)
     asset_figs = asset_figs.loc[:, features_to_keep[0]]
 
-    features = features.append(asset_figs.iloc[-1,:])
+    features = features.append(asset_figs.iloc[-(delta+1),:])
     print(ticker); print(features.shape)
 
 first_cols = ['Date','sector', 'Ticker']; rem_cols = [col for col in features.columns if col not in first_cols]
