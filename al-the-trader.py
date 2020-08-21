@@ -40,9 +40,7 @@ if manual:
         num_shares = asset.shares
 
         # Update WATCHLIST df: price, trend (% change), indicator values
-        WATCHLIST.loc[ticker, 'price'] = asset.price
-        WATCHLIST.loc[ticker, 'pct_change'] = asset.trend
-        WATCHLIST.loc[ticker, 'rsi'] = asset.rsi
+        WATCHLIST = alg.update_port_ticker_values(WATCHLIST, ticker, asset)
 
         # Trade 
         trade = alg.execute_trade(asset, order, num_shares, STOCKS, PORTFOLIO, TRADES)
@@ -64,9 +62,7 @@ else:
         num_shares = alg.buyable_shares(asset.price, CASH_ON_HAND)  # TEMPORARY: num shares to buy
 
         # Update WATCHLIST df: price, trend (% change), indicator values
-        WATCHLIST.loc[ticker, 'price'] = asset.price
-        WATCHLIST.loc[ticker, 'pct_change'] = asset.trend
-        WATCHLIST.loc[ticker, 'rsi'] = asset.rsi
+        WATCHLIST = alg.update_port_ticker_values(WATCHLIST, ticker, asset)
 
         if order != 'neutral': 
             # Check if portfolio contains enough cash/shares to buy/sell, and last activity
@@ -91,7 +87,6 @@ else:
 PORTFOLIO.loc['STOCKS'].value = STOCKS.value.sum()
 PORTFOLIO.loc['TOTAL'] = sum([PORTFOLIO.loc['CASH'].value,
                             PORTFOLIO.loc['STOCKS'].value])
-
 PORTFOLIO_HIST = PORTFOLIO_HIST.loc[PORTFOLIO_HIST.index.str[0:10] != current_date.strftime("%d/%m/%Y")]
 PORTFOLIO_HIST.loc[current_date.strftime("%d/%m/%Y %H:%M:%S")] = PORTFOLIO.transpose().values[0]
 

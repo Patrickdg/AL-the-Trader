@@ -106,6 +106,14 @@ def todays_trades(trades_df):
     trades_executed = trades_df.loc[trades_df.date.str[0:10] == day]
     return trades_executed
 
+##ASSET SETUP
+def update_port_ticker_values(df, ticker, asset):
+    df.loc[ticker, 'price'] = asset.price
+    df.loc[ticker, 'pct_change'] = asset.trend
+    df.loc[ticker, 'rsi'] = asset.rsi
+
+    return df
+
 ##EXCEL
 def update_workbook(watchlist, stocks_df, portfolio_df, trades_df, portfolio_hist):
     writer = pd.ExcelWriter('portfolio.xlsx')
