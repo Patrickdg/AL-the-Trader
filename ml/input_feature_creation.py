@@ -36,7 +36,6 @@ BENCHMARK INDEX
 ##Indicators
 benchmark_history = yf.Ticker(benchmark_ticker).history(period = period)
 benchmark_history = ra.add_all_features(benchmark_history, cols, drop_cols, periods, funcs)
-benchmark_history['next_close'] = benchmark_history['Close'].shift(-1)
 ##Denote market benchmark column names
 benchmark_history.columns = [f'market_{col}' for col in benchmark_history.columns]
 
@@ -51,11 +50,16 @@ MAIN LOOP
 features = pd.DataFrame()
 for ticker in WATCHLIST.index: 
     # Initialize asset history
-    asset = yf.Ticker(ticker)
-    asset_figs = asset.history(period = period)
+    try:
+        asset = yf.Ticker(ticker)
+        asset_figs = asset.history(period = period)
+    except Exception as err:
+        print(str(err))
+        continue
 
     # Add Rolling columns + indicators
     asset_figs = ra.add_all_features(asset_figs, cols, drop_cols, periods, funcs)
+    print(asset_figs)
     # JOIN: Benchmark info
     asset_figs = pd.merge(asset_figs, benchmark_history, on = 'Date')
 
@@ -74,7 +78,6 @@ for ticker in WATCHLIST.index:
         asset_figs['sector'] = 'No Sector'
     asset_figs['Ticker'] = ticker
     
-    # Drop all-Nan columns, Reorder columns
     asset_figs.reset_index(inplace = True)
     asset_figs = asset_figs.loc[:, features_to_keep[0]]
 
@@ -84,4 +87,4 @@ for ticker in WATCHLIST.index:
 first_cols = ['Date','sector', 'Ticker']; rem_cols = [col for col in features.columns if col not in first_cols]
 features = features[first_cols+rem_cols]
 features.reset_index(drop = True, inplace = True)
-features.to_csv(f'ml/regression/lm_inputs/inputs/TESTinput_features_{current_date.strftime("%m-%d-%Y")}.csv')
+features.to_csv(f'ml/regression/lm_inputs/inputs/input_features_{current_date.strftime("%m-%d-%Y")}.csv')
