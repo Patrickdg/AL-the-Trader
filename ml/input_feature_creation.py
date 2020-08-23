@@ -59,7 +59,6 @@ for ticker in WATCHLIST.index:
 
     # Add Rolling columns + indicators
     asset_figs = ra.add_all_features(asset_figs, cols, drop_cols, periods, funcs)
-    print(asset_figs)
     # JOIN: Benchmark info
     asset_figs = pd.merge(asset_figs, benchmark_history, on = 'Date')
 
