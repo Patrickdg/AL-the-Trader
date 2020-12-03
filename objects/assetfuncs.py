@@ -91,7 +91,10 @@ def calc_rs(historicals, lookback_period = 10, avg_method = 'sma'):
     u_avg = sum(u_changes)/lookback_period
     d_avg = sum(d_changes)/lookback_period
 
-    rs = u_avg / d_avg
+    try:
+        rs = u_avg / d_avg
+    except ZeroDivisionError:
+        rs = u_avg/0.0000001
     return rs
 
 def calc_rsi(data, lookback_period = 10, avg_method = 'sma'):
