@@ -18,7 +18,8 @@ Scraping is performed using *yfinance* module and *pandas* to wrangle data into 
 - Excel (portfolio tracking)
 - Tableau (portfolio visualization & additional analytics)
 
-## In-progress Implementations
+## In-progress Implementations  
+- Backdating (in the event of missed runs)  
 - Additional technical indicators: 
     - DCF  
     - 50-200SMA  
