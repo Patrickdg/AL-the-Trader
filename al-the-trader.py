@@ -6,8 +6,17 @@ with a simple moving average (SMA) and shortened lookback period of 10 days.
 Current watchlist contains the 30 stocks in the DJIA, as of May 1, 2020. 
 
 TO-DO: 
+- Cleanup: move main script to algofunc.py, cleanup for loop  
 - Backdating
-- Portfolio summary adjustments (running overall return, 
+    - run check to build list of days that trading did not run  
+    - iterate over each day, run trading logic  
+        --> initialize portfolios/assets
+        --> for day in trading_days: 
+            --> for ticker in portfolio: 
+                --> run trading sim  
+                --> update portfolio and gsheet
+- Portfolio summary adjustments (
+    running overall return, 
     current portfolio return, 
     performance metrics, 
     trade profits, 
@@ -15,6 +24,7 @@ TO-DO:
 """
 
 # LIBRARIES 
+import pandas as pd
 from datetime import datetime
 from objects import assetfuncs as af
 from objects import algofuncs as alg
@@ -24,38 +34,19 @@ from objects.algofuncs import PORTFOLIO, PORTFOLIO_HIST, WATCHLIST, STOCKS, TRAD
 from objects.updatefuncs import GS_WORKBOOK
 
 # DECLARATIONS
-testing = False
+testing = True
 manual = False # for manually selling/buying shares through bugs
 current_date = datetime.now()
 
 # MAIN
-if manual: 
-    ### TEMPORARY for manual sell trades - current bug: not selling @ rsi > 70.
-    tickers = ['WMT'] # SET MANUAL TICKERS
+missed_trading_days = pd.date_range(PORTFOLIO_HIST.index[-1], current_date, normalize = True)
 
-    for ticker in tickers: 
-        asset = alg.initialize_asset(ticker, STOCKS)
+for ticker in WATCHLIST.index:
+    asset = alg.initialize_asset(ticker, STOCKS)
 
-        order = 'sell'
-        num_shares = asset.shares
-
-        # Update WATCHLIST df: price, trend (% change), indicator values
-        WATCHLIST = alg.update_port_ticker_values(WATCHLIST, ticker, asset)
-
-        # Trade 
-        trade = alg.execute_trade(asset, order, num_shares, STOCKS, PORTFOLIO, TRADES)
-        TRADES = TRADES.append(trade, ignore_index = True)
-        PORTFOLIO.loc['CASH'].value -= asset.cash_change
-
-        # Update STOCKS df to remove unowned tickers, or update with new values
-        if asset.shares == 0: 
-            STOCKS.drop(asset.ticker, inplace = True)
-        elif asset.shares > 0: 
-            STOCKS.loc[asset.ticker] = asset.compiled
-else: 
+for day in missed_trading_days: 
     for ticker in WATCHLIST.index:
         # Initialize asset
-        asset = alg.initialize_asset(ticker, STOCKS)
 
         # Check triggers & determine action
         order = alg.check_indicators(asset, ['rsi']) #buy, sell, or neutral
@@ -94,10 +85,11 @@ WATCHLIST.sort_values(by = 'rsi', inplace = True)
 
 if not testing: 
     #UPDATE: EXCEL
-    alg.update_workbook(WATCHLIST, STOCKS, PORTFOLIO, TRADES, PORTFOLIO_HIST)
+    alg.update_workbook('portfolio.xlsx', WATCHLIST, STOCKS, PORTFOLIO, TRADES, PORTFOLIO_HIST)
     #UPDATE: GOOGLE SHEETS
     sheet_names_list = ['watchlist','stocks','portfolio','trades','summary']
     df_list = [WATCHLIST, STOCKS, PORTFOLIO, TRADES, PORTFOLIO_HIST]
+
     try:
         for name, df in zip(sheet_names_list, df_list): 
             uf.update_gs_workbook(GS_WORKBOOK, name, df) 
@@ -108,3 +100,5 @@ if not testing:
     if current_date.hour >= 16:
         trades_executed = alg.todays_trades(TRADES)
         alg.send_email(trades_executed, STOCKS, PORTFOLIO)
+elif testing: 
+    alg.update_workbook('__testing/portfolio_testing.xlsx', WATCHLIST, STOCKS, PORTFOLIO, TRADES, PORTFOLIO_HIST)

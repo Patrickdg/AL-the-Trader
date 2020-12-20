@@ -115,8 +115,8 @@ def update_port_ticker_values(df, ticker, asset):
     return df
 
 ##EXCEL
-def update_workbook(watchlist, stocks_df, portfolio_df, trades_df, portfolio_hist):
-    writer = pd.ExcelWriter('portfolio.xlsx')
+def update_workbook(file_name, watchlist, stocks_df, portfolio_df, trades_df, portfolio_hist):
+    writer = pd.ExcelWriter(file_name)
     dfs = [watchlist, stocks_df, portfolio_df, trades_df, portfolio_hist]
     sheet_names = ['watchlist', 'stocks','portfolio', 'trades', 'summary']
 
