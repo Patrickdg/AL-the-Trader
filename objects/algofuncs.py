@@ -31,6 +31,8 @@ EMAIL_PASSWORD = os.environ.get('AL_PASS')
 def initialize_asset(ticker, stocks_df):
     asset = af.Asset(ticker)
     asset.update_values(stocks_df)
+    print(f"INITIALIZED: {ticker}")
+
     return asset
 
 def check_indicators(asset, indicators):
@@ -77,7 +79,7 @@ def check_tradable(asset, buy_sell, num_shares, stocks_df, portfolio_df):
 
     return tradable
 
-def execute_trade(asset, buy_sell, num_shares, stocks_df, portfolio_df, trades_df):
+def execute_trade(date, asset, buy_sell, num_shares, stocks_df, portfolio_df, trades_df):
     # @ asset-level
     asset.buy_sell(buy_sell, num_shares) 
     # @ portfolio-level

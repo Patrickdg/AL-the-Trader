@@ -5,18 +5,19 @@ import yfinance as yf
 
 # OBJECTS
 class Asset():
-    def __init__(self, ticker, period = '2mo'):
-        data = yf.Ticker(ticker)
+    def __init__(self, ticker):
+        self.data = yf.Ticker(ticker)
+        self.all_history = self.data.history(period = '1y').Close
         
+        #Price values; updated each trading day via self.update_history_subset()
         self.ticker = ticker
-        self.history = data.history(period = period).Close
-        self.price = data.history(period = period).Close[-1]
-        self.prev = data.history(period = period).Close[-2]
+        self.history = self.all_history
+        self.price = self.history[-1]
+        self.prev = self.history[-2]
         self.trend = round(((self.price / self.prev) - 1) * 100, 4)
 
         self.shares = 0 # shares held in portfolio
         self.purch_price = ''
-        self.performance = ''
         self.last_activity = ''
 
         self.rsi = calc_rsi(self.history)
@@ -29,12 +30,10 @@ class Asset():
                 self.purch_price = stocks_df.loc[self.ticker].purch_price
                 self.shares = stocks_df.loc[self.ticker].shares
                 self.last_activity = stocks_df.loc[self.ticker].last_activity
-                self.performance = round(((self.price / self.purch_price) - 1) * 100, 4)
             except KeyError:
                 self.purch_price = 'NA'
                 self.shares = 0
                 self.last_activity = 'NA'
-                self.performance = 'NA'
 
     def update_compile(self):
         self.compiled = [
@@ -42,7 +41,6 @@ class Asset():
                     self.price,
                     self.shares,
                     self.price * self.shares,
-                    self.performance,
                     self.rsi, 
                     self.last_activity
                     ]
@@ -50,6 +48,17 @@ class Asset():
     def update_values(self, stocks_df):
         self.get_current_holdings(stocks_df)
         self.update_compile()
+
+    def get_history_subset(self, start_date, end_date): 
+        return self.all_history.loc[start_date : end_date]
+
+    def update_history_subset(self, start_date, end_date):
+        self.history = self.get_history_subset(start_date, end_date)
+        self.price = self.history[-1]
+        self.prev = self.history[-2]
+        self.trend = round(((self.price / self.prev) - 1) * 100, 4)
+
+        self.rsi = calc_rsi(self.history)
         
     def get_rsi(self, period = 10, avg_method = 'sma'):
         self.rsi = calc_rsi(self.history, period, avg_method)
