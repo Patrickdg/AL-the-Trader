@@ -10,7 +10,7 @@ Current watchlist tracks the 30 stocks in the DOW (as of May 1, 2020).
 
 Scraping is performed using *yfinance* module and *pandas* to wrangle data into excel. 
 
-**[Live Dashboard - Portfolio Summary](https://public.tableau.com/profile/patrick.de.guzman5555#!/vizhome/ALtheTrader-PortfolioSummary/Dashboard1)**
+**[Live Dashboard - Portfolio Summary](https://public.tableau.com/profile/patrick.de.guzman5555#!/vizhome/ALtheTrader-PortfolioSummary/SUMMARYDASHBOARD)**  
 
 ## Domains 
 - Python (scraping, triggers, & transactions)
