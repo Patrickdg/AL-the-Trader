@@ -7,7 +7,7 @@ import yfinance as yf
 class Asset():
     def __init__(self, ticker):
         self.data = yf.Ticker(ticker)
-        self.all_history = self.data.history(period = '1y').Close
+        self.all_history = self.data.history(period = '2y').Close
         
         #Price values; updated each trading day via self.update_history_subset()
         self.ticker = ticker

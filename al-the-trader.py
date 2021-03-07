@@ -5,8 +5,6 @@ with a simple moving average (SMA) and shortened lookback period of 10 days.
 
 Current watchlist contains the 30 stocks in the DJIA, as of May 1, 2020. 
 
-TO-DO: 
-- Cleanup: move main script to algofunc.py, cleanup for loop  
 - Backdating
     - run check to build list of days that trading did not run  
     - iterate over each day, run trading logic  
@@ -15,12 +13,6 @@ TO-DO:
             --> for ticker in portfolio: 
                 --> run trading sim  
                 --> update portfolio and gsheet
-- Portfolio summary adjustments (
-    running overall return, 
-    current portfolio return, 
-    performance metrics, 
-    trade profits, 
-    # days held)
 """
 
 # LIBRARIES 
@@ -31,7 +23,7 @@ from objects import algofuncs as alg
 from objects.algofuncs import PORTFOLIO, PORTFOLIO_HIST, WATCHLIST, STOCKS, TRADES, CASH_ON_HAND
 
 # DECLARATIONS
-testing = True
+testing = False
 lookback_period = 60
 current_date = datetime.now()
 missed_trading_days = pd.bdate_range(PORTFOLIO_HIST.index[-1], current_date, normalize = True)

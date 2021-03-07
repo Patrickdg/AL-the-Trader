@@ -83,7 +83,7 @@ def execute_trade(date, asset, buy_sell, num_shares, stocks_df, portfolio_df, tr
     # @ asset-level
     asset.buy_sell(buy_sell, num_shares) 
     # @ portfolio-level
-    trade_date = datetime.now().strftime(r"%d/%m/%Y %H:%M:%S")
+    trade_date = date.strftime(r"%d/%m/%Y %H:%M:%S")
     shares_value = asset.price * num_shares
     executed = pd.Series([trade_date, asset.ticker, buy_sell, num_shares, shares_value], index = trades_df.columns)
     return executed 
