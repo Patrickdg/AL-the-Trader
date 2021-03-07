@@ -18,16 +18,16 @@ Scraping is performed using *yfinance* module and *pandas* to wrangle data into 
 - Excel (portfolio tracking)
 - Tableau (portfolio visualization & additional analytics)
 
-## In-progress Implementations  
-- Backdating (in the event of missed runs)  
+## To-do  
+- Market performance: Incorporate daily DJIA close in charting  
+
+## Future Implementations 
 - Additional technical indicators: 
     - DCF  
     - 50-200SMA  
     - Bollinger bands  
     - MACD  
 - Dynamic algorithms (ML) 
-
-## Future Implementations 
 - Dynamic watchlist (based on trending indicators + other screens)
 - Optimal (+ automatic) technical indicator selection per watchlist stock via back-testing, comparison of returns, statistical significance testing
     - Discounted Cash Flow (DCF) Valuation modelling triggers

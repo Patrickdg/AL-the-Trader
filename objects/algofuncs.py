@@ -116,6 +116,15 @@ def update_port_ticker_values(df, ticker, asset):
 
     return df
 
+def update_holdings_values(stocks_df, assets_list):
+    for asset in assets_list: 
+        if asset.shares > 0:
+            stocks_df.loc[asset.ticker, 'current_price'] = asset.price
+            stocks_df.loc[asset.ticker, 'current_rsi'] = asset.rsi
+            stocks_df.loc[asset.ticker, 'value'] = asset.price * asset.shares
+
+    return stocks_df
+
 ##EXCEL
 def update_workbook(file_name, watchlist, stocks_df, portfolio_df, trades_df, portfolio_hist):
     writer = pd.ExcelWriter(file_name)

@@ -60,7 +60,7 @@ for trading_day in missed_trading_days:
                 TRADES = TRADES.append(trade, ignore_index = True)
                 PORTFOLIO.loc['CASH'].value -= asset.cash_change
                 # Update STOCKS df to remove unowned tickers, or update with new values
-                if asset.shares == 0: 
+                if asset.shares == 0 or asset.shares == 'NaN': 
                     STOCKS.drop(asset.ticker, inplace = True)
             else:
                 print(f"{asset.ticker}: Hold at {asset.price} on {trading_day}\n")
@@ -71,6 +71,7 @@ for trading_day in missed_trading_days:
             STOCKS.loc[asset.ticker] = asset.compiled
 
     # Update dfs
+    STOCKS = alg.update_holdings_values(STOCKS, ASSETS)
     PORTFOLIO.loc['STOCKS'].value = STOCKS.value.sum()
     PORTFOLIO.loc['TOTAL'] = sum([PORTFOLIO.loc['CASH'].value,
                                 PORTFOLIO.loc['STOCKS'].value])
