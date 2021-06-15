@@ -26,7 +26,8 @@ from objects.algofuncs import PORTFOLIO, PORTFOLIO_HIST, WATCHLIST, STOCKS, TRAD
 testing = False
 lookback_period = 60
 current_date = datetime.now()
-missed_trading_days = pd.bdate_range(PORTFOLIO_HIST.index[-1], current_date, normalize = True)
+last_trading_day = datetime.strptime(PORTFOLIO_HIST.index[-1], "%d/%m/%Y %H:%M:%S")
+missed_trading_days = pd.bdate_range(last_trading_day, current_date, normalize = True)
 
 # MAIN
 ## Initialize assets
